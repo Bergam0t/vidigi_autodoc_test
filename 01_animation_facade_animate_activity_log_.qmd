@@ -22,8 +22,8 @@ You provide these inputs, and `animate_activity_log` coordinates all the underly
 
 Let's say you have your data ready in two tables (we'll learn how to make these in later chapters!):
 
-*   `my_event_log`: A table listing every time a patient arrived, started waiting, got treated, etc.
-*   `my_layout`: A table defining the (x, y) coordinates on the screen for "Arrival", "Waiting Area", "Treatment Room", and "Exit".
+-  `my_event_log`: A table listing every time a patient arrived, started waiting, got treated, etc.
+-  `my_layout`: A table defining the (x, y) coordinates on the screen for "Arrival", "Waiting Area", "Treatment Room", and "Exit".
 
 Using `animate_activity_log` is straightforward:
 
@@ -110,8 +110,8 @@ sequenceDiagram
 
 Essentially, `animate_activity_log` orchestrates calls to these more specialized functions, which you can explore in later chapters:
 
-*   [Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
-*   [Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)
+-  [Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
+-  [Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)
 
 You *can* call these functions individually if you need very fine-grained control, but for most uses, the `animate_activity_log` facade is the way to go!
 
@@ -119,12 +119,12 @@ You *can* call these functions individually if you need very fine-grained contro
 
 While we used basic options above, `animate_activity_log` has many parameters to customize your animation:
 
-*   `every_x_time_units`: How often to take a snapshot (smaller numbers = smoother but potentially slower animation).
-*   `icon_and_text_size`: Controls the size of the patient icons and any labels.
-*   `add_background_image`: You can overlay the animation on a floor plan or diagram!
-*   `time_display_units`: Show time as simple numbers, or format it like 'Days:Hours:Minutes'.
-*   `frame_duration` / `frame_transition_duration`: Control the speed of the animation playback.
-*   `wrap_queues_at`: How many patients to show in a line before starting a new row in a queue.
+-  `every_x_time_units`: How often to take a snapshot (smaller numbers = smoother but potentially slower animation).
+-  `icon_and_text_size`: Controls the size of the patient icons and any labels.
+-  `add_background_image`: You can overlay the animation on a floor plan or diagram!
+-  `time_display_units`: Show time as simple numbers, or format it like 'Days:Hours:Minutes'.
+-  `frame_duration` / `frame_transition_duration`: Control the speed of the animation playback.
+-  `wrap_queues_at`: How many patients to show in a line before starting a new row in a queue.
 
 ...and many more! Check the function's documentation for all the possibilities.
 

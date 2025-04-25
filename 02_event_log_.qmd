@@ -8,12 +8,12 @@ This chapter focuses on the first ingredient: the **Event Log**. It's the heart 
 
 Imagine you're trying to make a movie about a busy day at a small clinic. To show what happened accurately, you wouldn't just film random moments. You'd need a detailed script or a logbook tracking each patient:
 
-*   *When* did Patient Alice arrive? (9:00 AM)
-*   *When* did she start waiting in the waiting room? (9:01 AM)
-*   *When* did Nurse Bob become free? (9:15 AM)
-*   *When* did Alice start her consultation with Nurse Bob? (9:15 AM)
-*   *When* did the consultation end? (9:30 AM)
-*   *When* did Alice leave the clinic? (9:31 AM)
+-  *When* did Patient Alice arrive? (9:00 AM)
+-  *When* did she start waiting in the waiting room? (9:01 AM)
+-  *When* did Nurse Bob become free? (9:15 AM)
+-  *When* did Alice start her consultation with Nurse Bob? (9:15 AM)
+-  *When* did the consultation end? (9:30 AM)
+-  *When* did Alice leave the clinic? (9:31 AM)
 
 And you'd need this information for *every* patient (Alice, Charlie, David...).
 
@@ -25,23 +25,23 @@ The Event Log is essentially a table, most commonly represented as a `pandas` Da
 
 To work correctly with `vidigi`, this table *must* have specific columns:
 
-*   **`patient`**: This column identifies *who* the event happened to. It could be a patient ID number, a customer name, a product code – whatever uniquely identifies the entity moving through your system.
-*   **`event_type`**: This tells `vidigi` the *kind* of event that occurred. It's a broad category. The main types are:
+-  **`patient`**: This column identifies *who* the event happened to. It could be a patient ID number, a customer name, a product code – whatever uniquely identifies the entity moving through your system.
+-  **`event_type`**: This tells `vidigi` the *kind* of event that occurred. It's a broad category. The main types are:
     *   `arrival_departure`: The entity entered or exited the system.
     *   `queue`: The entity started waiting in a line or area.
     *   `resource_use`: The entity started using a specific resource (like a nurse, a machine, a checkout counter).
     *   `resource_use_end`: The entity finished using that specific resource.
-*   **`event`**: This gives the *specific name* of the event. For arrivals and departures, this *must* be exactly `'arrival'` or `'depart'`. For queues and resource use, you can define custom names (like `'start_wait_room'`, `'begin_treatment'`, `'end_checkout'`).
-*   **`time`**: This records *when* the event happened, usually as a number representing the simulation time (e.g., minutes or hours from the start).
+-  **`event`**: This gives the *specific name* of the event. For arrivals and departures, this *must* be exactly `'arrival'` or `'depart'`. For queues and resource use, you can define custom names (like `'start_wait_room'`, `'begin_treatment'`, `'end_checkout'`).
+-  **`time`**: This records *when* the event happened, usually as a number representing the simulation time (e.g., minutes or hours from the start).
 
 And one more, which is needed only for specific `event_type`s:
 
-*   **`resource_id`**: When an entity starts or stops using a *specific* resource (like Treatment Room **1** vs Treatment Room **2**), this column tells `vidigi` *which one* it was. This is only required for `event_type` `'resource_use'` and `'resource_use_end'`.
+-  **`resource_id`**: When an entity starts or stops using a *specific* resource (like Treatment Room **1** vs Treatment Room **2**), this column tells `vidigi` *which one* it was. This is only required for `event_type` `'resource_use'` and `'resource_use_end'`.
 
 You might also see other helpful columns like:
 
-*   `pathway`: If your system has different routes entities can take, this might label the specific path.
-*   `run`: If you run your simulation multiple times, this identifies which run the event belongs to.
+-  `pathway`: If your system has different routes entities can take, this might label the specific path.
+-  `run`: If you run your simulation multiple times, this identifies which run the event belongs to.
 
 ## A Simple Example
 
@@ -105,7 +105,7 @@ Think of `vidigi` as an animator reading the script (the Event Log) frame by fra
 You typically don't create these logs by hand! They are usually generated automatically:
 
 1.  **Simulation Models:** Software like SimPy (often used with `vidigi`) or Ciw can be programmed to record these events automatically as the simulation runs. You add small "logging" snippets to your simulation code at key points (like when a patient arrives, requests a resource, etc.).
-    *   `vidigi` provides helpers to make this easier, like [`CustomResource`](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd) and [`populate_store`](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd) for SimPy.
+    *   `vidigi` provides helpers to make this easier, like [`CustomResource`](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd) and [`populate_store`](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd) for SimPy.
     *   There's even a utility (`utils.event_log_from_ciw_recs`) to convert logs from the Ciw library.
     *   An example of adding logging to a SimPy model can be found in the documentation (`vidigi_docs/adding_vidigi_to_a_simple_simpy_model_hsma_structure.qmd`).
 2.  **Real-World Data:** Sometimes, you might have data logs from real systems (like timestamped entries in a hospital database or factory sensor readings). You would need to process this data into the specific `vidigi` Event Log format (with the required columns).

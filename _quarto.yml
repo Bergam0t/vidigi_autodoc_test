@@ -17,7 +17,7 @@ website:
           - text: "Layout Configuration (event_position_df)"
             file: 03_layout_configuration_event_position_df_.qmd
           - text: "SimPy Resource Enhancement (CustomResource, Store, populate_store)"
-            file: 04_simpy_resource_enhancement___customresource____store____populate_store___.qmd
+            file: 04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
           - text: "Snapshot Preparation (reshape_for_animations / generate_animation_df)"
             file: 05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
           - text: "Animation Generation (generate_animation)"

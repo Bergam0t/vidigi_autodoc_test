@@ -64,13 +64,13 @@ final_animation = generate_animation(
 
 The variable `final_animation` now holds a Plotly Figure object. If you displayed it (e.g., using `final_animation.show()` in a Jupyter notebook), you would see the complete, interactive animation:
 
-*   Icons (like '🧔🏼' and '👨🏿‍🦯') representing patients moving between locations defined in `my_layout`.
-*   Smooth transitions between the time steps recorded in `animation_ready_df`.
-*   A slider at the bottom showing the time (formatted as Days/Hours/Minutes).
-*   Play/Pause buttons.
-*   Stage labels ("Entrance", "Waiting Area", etc.) displayed on the chart.
-*   Static markers showing the available treatment bays (based on `scenario_details`).
-*   Optionally, the 'floorplan.png' image in the background.
+-  Icons (like '🧔🏼' and '👨🏿‍🦯') representing patients moving between locations defined in `my_layout`.
+-  Smooth transitions between the time steps recorded in `animation_ready_df`.
+-  A slider at the bottom showing the time (formatted as Days/Hours/Minutes).
+-  Play/Pause buttons.
+-  Stage labels ("Entrance", "Waiting Area", etc.) displayed on the chart.
+-  Static markers showing the available treatment bays (based on `scenario_details`).
+-  Optionally, the 'floorplan.png' image in the background.
 
 ## What's Happening Under the Hood?
 
@@ -203,8 +203,9 @@ You've reached the end of the `vidigi` core concepts tutorial! We've seen how `g
 While often called behind the scenes by the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function, understanding `generate_animation` shows you how the final visualization is constructed.
 
 You now have a complete picture of the `vidigi` pipeline:
+
 1.  Starting with an [Event Log](02_event_log_.qmd) (the script) and a [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) (the map).
-2.  Ensuring resources are uniquely identified using the pattern from [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd).
+2.  Ensuring resources are uniquely identified using the pattern from [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd).
 3.  Preparing frame-by-frame snapshot data using the functions covered in [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd).
 4.  Finally, rendering the animation with `generate_animation` (this chapter), often orchestrated by the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) facade.
 

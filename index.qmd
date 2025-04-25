@@ -40,7 +40,7 @@ flowchart TD
 3. [Layout Configuration (`event_position_df`)
 ](03_layout_configuration_event_position_df_.qmd)
 4. [Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)
-](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd)
+](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd)
 5. [Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)
 ](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
 6. [Animation Generation (`generate_animation`)

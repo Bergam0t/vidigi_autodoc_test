@@ -7,9 +7,10 @@ That's where the **Layout Configuration**, represented by the `event_position_df
 ## Setting the Stage: Why We Need a Layout
 
 Imagine you're setting up a stage play. You need to decide:
-*   Where will actors enter? (Stage Left)
-*   Where is the waiting bench? (Center Stage)
-*   Where is the doctor's office set piece? (Stage Right)
+
+-   Where will actors enter? (Stage Left)
+-   Where is the waiting bench? (Center Stage)
+-   Where is the doctor's office set piece? (Stage Right)
 
 Without this plan, the actors wouldn't know where to go, and the audience would be confused.
 
@@ -21,19 +22,20 @@ The `event_position_df` is typically a `pandas` DataFrame – essentially a tabl
 
 Here are the essential columns you need in this table:
 
-*   **`event`**: This column contains the *exact name* of the event from your [Event Log](02_event_log_.qmd) that corresponds to this location. For example, `'arrival'`, `'start_wait'`, `'treatment_begins'`. This is how `vidigi` links the location map to the event script.
-*   **`x`**: The horizontal coordinate (position from left to right) for this event's base location on the screen.
-*   **`y`**: The vertical coordinate (position from top to bottom) for this event's base location on the screen.
+-   **`event`**: This column contains the *exact name* of the event from your [Event Log](02_event_log_.qmd) that corresponds to this location. For example, `'arrival'`, `'start_wait'`, `'treatment_begins'`. This is how `vidigi` links the location map to the event script.
+-   **`x`**: The horizontal coordinate (position from left to right) for this event's base location on the screen.
+-   **`y`**: The vertical coordinate (position from top to bottom) for this event's base location on the screen.
 
 Think of the (X, Y) coordinates as **anchor points**.
-*   For **queues** (like `'start_wait'`), patients will line up extending *leftwards* from this anchor point.
-*   For **resources** (like `'treatment_begins'`), the available resource slots (e.g., treatment beds) will be placed near this anchor point, usually extending leftwards too.
-*   For **arrivals** and **departures**, patients will appear or disappear at this exact anchor point.
+
+-   For **queues** (like `'start_wait'`), patients will line up extending *leftwards* from this anchor point.
+-   For **resources** (like `'treatment_begins'`), the available resource slots (e.g., treatment beds) will be placed near this anchor point, usually extending leftwards too.
+-   For **arrivals** and **departures**, patients will appear or disappear at this exact anchor point.
 
 You'll often include these helpful optional columns too:
 
-*   **`label`**: A human-readable name for the stage (like `"Arrival Area"`, `"Waiting Room"`, `"Treatment Bays"`). `vidigi` can display these labels on the animation to make it easier to understand.
-*   **`resource`**: This column links events associated with resource usage (like `'treatment_begins'`) to the *name* of the resource capacity defined in an external object (often called `scenario`). For example, if you have an event `'treatment_begins'` and your `scenario` object says you have `scenario.n_nurses = 5` nurses, you would put `'n_nurses'` in the `resource` column for the `'treatment_begins'` row. This tells `vidigi` how many resource slots to draw and manage for that step.
+-   **`label`**: A human-readable name for the stage (like `"Arrival Area"`, `"Waiting Room"`, `"Treatment Bays"`). `vidigi` can display these labels on the animation to make it easier to understand.
+-   **`resource`**: This column links events associated with resource usage (like `'treatment_begins'`) to the *name* of the resource capacity defined in an external object (often called `scenario`). For example, if you have an event `'treatment_begins'` and your `scenario` object says you have `scenario.n_nurses = 5` nurses, you would put `'n_nurses'` in the `resource` column for the `'treatment_begins'` row. This tells `vidigi` how many resource slots to draw and manage for that step.
 
 ## A Simple Blueprint Example
 
@@ -55,7 +57,7 @@ my_layout = pd.DataFrame(layout_data)
 print(my_layout)
 ```
 
-**Output:**
+-*Output:**
 
 ```
               event    x    y             label   resource
@@ -67,12 +69,13 @@ print(my_layout)
 ```
 
 Let's break this down:
-*   **Row 0:** Anyone recorded with the `event` 'arrival' in the log will appear at coordinates (X=50, Y=200). This spot will be labelled "Entrance".
-*   **Row 1:** When a patient's `event` becomes 'start_wait', they move towards (X=200, Y=250). If others are already waiting, they'll queue up extending to the left from this point. This area is labelled "Waiting Area".
-*   **Row 2:** When a patient's `event` is 'treatment_begins', they move towards (X=200, Y=150). Because this row has `'n_cubicles'` in the `resource` column, `vidigi` knows this involves using a resource. It will look up how many `n_cubicles` are available (from the `scenario` object you provide) and place the patient icon in the correct cubicle slot near (200, 150). This area is labelled "Treatment Bays".
-*   **Row 3 & 4:** Patients move to (350, 150) for 'depart' and finally vanish at the 'exit' point (350, 50).
 
-*(Note: We added an 'exit' event here, which wasn't in the Chapter 2 log but is often added automatically by `vidigi`'s internal processing to ensure entities cleanly leave the screen).*
+-   **Row 0:** Anyone recorded with the `event` 'arrival' in the log will appear at coordinates (X=50, Y=200). This spot will be labelled "Entrance".
+-   **Row 1:** When a patient's `event` becomes 'start_wait', they move towards (X=200, Y=250). If others are already waiting, they'll queue up extending to the left from this point. This area is labelled "Waiting Area".
+-   **Row 2:** When a patient's `event` is 'treatment_begins', they move towards (X=200, Y=150). Because this row has `'n_cubicles'` in the `resource` column, `vidigi` knows this involves using a resource. It will look up how many `n_cubicles` are available (from the `scenario` object you provide) and place the patient icon in the correct cubicle slot near (200, 150). This area is labelled "Treatment Bays".
+-   **Row 3 & 4:** Patients move to (350, 150) for 'depart' and finally vanish at the 'exit' point (350, 50).
+
+-(Note: We added an 'exit' event here, which wasn't in the Chapter 2 log but is often added automatically by `vidigi`'s internal processing to ensure entities cleanly leave the screen).*
 
 ## Using the Blueprint
 
@@ -142,10 +145,10 @@ sequenceDiagram
 
 ## Tips for Setting Up Your Layout
 
-*   **Match Event Names:** The `event` names in `event_position_df` *must exactly match* the `event` names used in your `event_log`.
-*   **Coordinates are Anchors:** Remember (X, Y) are often the *bottom-right* anchor for queues and resources, which typically extend leftwards and potentially upwards in rows.
-*   **Use `setup_mode`:** When first creating your layout, pass `setup_mode=True` to `animate_activity_log`. This will display grid lines and coordinate axes on the animation, making it much easier to figure out good X and Y values!
-*   **Iterate:** Getting the layout perfect often takes a few tries. Run the animation, see how it looks, adjust the X/Y values in your DataFrame, and run it again.
+-   **Match Event Names:** The `event` names in `event_position_df` *must exactly match* the `event` names used in your `event_log`.
+-   **Coordinates are Anchors:** Remember (X, Y) are often the *bottom-right* anchor for queues and resources, which typically extend leftwards and potentially upwards in rows.
+-   **Use `setup_mode`:** When first creating your layout, pass `setup_mode=True` to `animate_activity_log`. This will display grid lines and coordinate axes on the animation, making it much easier to figure out good X and Y values!
+-   **Iterate:** Getting the layout perfect often takes a few tries. Run the animation, see how it looks, adjust the X/Y values in your DataFrame, and run it again.
 
 ## Conclusion
 
@@ -153,7 +156,7 @@ The `event_position_df` is your essential blueprint for the visual layout of you
 
 Now that we understand the *script* (`event_log`) and the *stage map* (`event_position_df`), we need to look closer at the *actors* that use specific props – the resources. How does `vidigi` handle knowing exactly *which* cubicle or *which* nurse a patient is using? That involves enhancing how we define and use resources in our simulation model, which is the topic of our next chapter.
 
-Next up: [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd)
+Next up: [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd)
 
 ---
 

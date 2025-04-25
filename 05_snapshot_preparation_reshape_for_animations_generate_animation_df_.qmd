@@ -1,17 +1,18 @@
 # Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)
 
-In [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd), we learned how to make sure our simulation records *which specific* resource (like Cubicle 1 vs. Cubicle 2) each patient is using. This gives us a detailed [Event Log](02_event_log_.qmd), the script of our process. We also have our stage map, the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+In [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd), we learned how to make sure our simulation records *which specific* resource (like Cubicle 1 vs. Cubicle 2) each patient is using. This gives us a detailed [Event Log](02_event_log_.qmd), the script of our process. We also have our stage map, the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
 
 But how do we turn this script and map into an actual movie? A movie isn't just a list of events; it's a series of frames, or snapshots, showing where everyone is at specific moments in time. This chapter explores how `vidigi` prepares these snapshots.
 
 ## From Diary to Flipbook: The Need for Snapshots
 
 Think about the [Event Log](02_event_log_.qmd). It's like a detailed diary:
-*   9:00 AM: Alice arrived.
-*   9:01 AM: Alice started waiting.
-*   9:15 AM: Alice started treatment (Cubicle 1).
-*   9:30 AM: Alice finished treatment.
-*   9:31 AM: Alice departed.
+
+-  9:00 AM: Alice arrived.
+-  9:01 AM: Alice started waiting.
+-  9:15 AM: Alice started treatment (Cubicle 1).
+-  9:30 AM: Alice finished treatment.
+-  9:31 AM: Alice departed.
 
 This tells us *when things change*. But an animation needs to show the state of the system at regular intervals, say, every 5 minutes. What was happening at 9:05 AM? What about 9:10 AM?
 
@@ -91,8 +92,9 @@ Now we have our flipbook pages sketched (`reshape_for_animations` output), but t
 5.  **Record Final Position:** It stores the calculated `x_final`, `y_final`, and `icon` along with the original snapshot information.
 
 **Input:**
-*   The reshaped DataFrame from `reshape_for_animations`.
-*   The [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+
+-  The reshaped DataFrame from `reshape_for_animations`.
+-  The [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
 
 **Output:** The final "animation-ready" DataFrame. This contains everything needed to draw each frame: the time (`minute`), who (`patient`), their icon (`icon`), their exact position (`x_final`, `y_final`), and hover text (`label`).
 
@@ -142,8 +144,8 @@ First, `reshape_for_animations` processes the raw log into time slices. Then, `g
 
 Snapshot preparation is the crucial data transformation stage in `vidigi`. It bridges the gap between the raw, event-based simulation log and the frame-by-frame data needed for animation.
 
-*   **`reshape_for_animations`** acts like a scribe, turning the event diary into a flipbook summary by figuring out who is doing what at regular time intervals.
-*   **`generate_animation_df`** acts like an artist, taking the flipbook summary and the stage map (`event_position_df`) to calculate the exact (X, Y) coordinates for every character on every page, respecting queueing and resource layout rules.
+-  **`reshape_for_animations`** acts like a scribe, turning the event diary into a flipbook summary by figuring out who is doing what at regular time intervals.
+-  **`generate_animation_df`** acts like an artist, taking the flipbook summary and the stage map (`event_position_df`) to calculate the exact (X, Y) coordinates for every character on every page, respecting queueing and resource layout rules.
 
 Together, they produce a detailed DataFrame where each row represents an entity at a specific time with a specific icon and screen position. This prepared data is now ready to be fed into the final animation engine.
 
