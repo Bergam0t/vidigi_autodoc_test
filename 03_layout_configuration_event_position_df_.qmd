@@ -1,0 +1,160 @@
+# Chapter 3: Layout Configuration (`event_position_df`)
+
+In [Chapter 2: Event Log](02_event_log_.qmd), we learned about the `event_log`, which is like the detailed script telling `vidigi` *what* happened, *when*, and to *whom*. But just knowing the script isn't enough to make a movie – you also need to know where the scenes take place! Where is the entrance? Where's the waiting area? Where are the treatment rooms located on the screen?
+
+That's where the **Layout Configuration**, represented by the `event_position_df` DataFrame, comes in. It's the **blueprint** or **map** for your animation's background.
+
+## Setting the Stage: Why We Need a Layout
+
+Imagine you're setting up a stage play. You need to decide:
+*   Where will actors enter? (Stage Left)
+*   Where is the waiting bench? (Center Stage)
+*   Where is the doctor's office set piece? (Stage Right)
+
+Without this plan, the actors wouldn't know where to go, and the audience would be confused.
+
+Similarly, `vidigi` needs a map to know where to place the icons representing your patients or entities on the screen. The `event_position_df` provides exactly this map. For every key step (event) in your process, it defines a specific **(X, Y) coordinate** on the animation screen.
+
+## What Does the Layout Blueprint Look Like?
+
+The `event_position_df` is typically a `pandas` DataFrame – essentially a table. Each row in this table describes a specific location or stage in your process.
+
+Here are the essential columns you need in this table:
+
+*   **`event`**: This column contains the *exact name* of the event from your [Event Log](02_event_log_.qmd) that corresponds to this location. For example, `'arrival'`, `'start_wait'`, `'treatment_begins'`. This is how `vidigi` links the location map to the event script.
+*   **`x`**: The horizontal coordinate (position from left to right) for this event's base location on the screen.
+*   **`y`**: The vertical coordinate (position from top to bottom) for this event's base location on the screen.
+
+Think of the (X, Y) coordinates as **anchor points**.
+*   For **queues** (like `'start_wait'`), patients will line up extending *leftwards* from this anchor point.
+*   For **resources** (like `'treatment_begins'`), the available resource slots (e.g., treatment beds) will be placed near this anchor point, usually extending leftwards too.
+*   For **arrivals** and **departures**, patients will appear or disappear at this exact anchor point.
+
+You'll often include these helpful optional columns too:
+
+*   **`label`**: A human-readable name for the stage (like `"Arrival Area"`, `"Waiting Room"`, `"Treatment Bays"`). `vidigi` can display these labels on the animation to make it easier to understand.
+*   **`resource`**: This column links events associated with resource usage (like `'treatment_begins'`) to the *name* of the resource capacity defined in an external object (often called `scenario`). For example, if you have an event `'treatment_begins'` and your `scenario` object says you have `scenario.n_nurses = 5` nurses, you would put `'n_nurses'` in the `resource` column for the `'treatment_begins'` row. This tells `vidigi` how many resource slots to draw and manage for that step.
+
+## A Simple Blueprint Example
+
+Let's create a basic `event_position_df` for the simple clinic example we've been using.
+
+```python
+import pandas as pd
+
+# Create the layout DataFrame
+layout_data = {
+    'event': ['arrival', 'start_wait', 'treatment_begins', 'depart', 'exit'], # Must match event names in the log!
+    'x': [50, 200, 200, 350, 350],  # Horizontal positions
+    'y': [200, 250, 150, 150, 50],   # Vertical positions
+    'label': ['Entrance', 'Waiting Area', 'Treatment Bays', 'Discharge', 'Exit Point'], # Human-friendly names
+    'resource': [None, None, 'n_cubicles', None, None] # Link 'treatment_begins' to the number of cubicles
+}
+my_layout = pd.DataFrame(layout_data)
+
+print(my_layout)
+```
+
+**Output:**
+
+```
+              event    x    y             label   resource
+0           arrival   50  200          Entrance       None
+1        start_wait  200  250      Waiting Area       None
+2  treatment_begins  200  150    Treatment Bays n_cubicles  # This step uses 'n_cubicles' resources
+3            depart  350  150         Discharge       None
+4              exit  350   50        Exit Point       None
+```
+
+Let's break this down:
+*   **Row 0:** Anyone recorded with the `event` 'arrival' in the log will appear at coordinates (X=50, Y=200). This spot will be labelled "Entrance".
+*   **Row 1:** When a patient's `event` becomes 'start_wait', they move towards (X=200, Y=250). If others are already waiting, they'll queue up extending to the left from this point. This area is labelled "Waiting Area".
+*   **Row 2:** When a patient's `event` is 'treatment_begins', they move towards (X=200, Y=150). Because this row has `'n_cubicles'` in the `resource` column, `vidigi` knows this involves using a resource. It will look up how many `n_cubicles` are available (from the `scenario` object you provide) and place the patient icon in the correct cubicle slot near (200, 150). This area is labelled "Treatment Bays".
+*   **Row 3 & 4:** Patients move to (350, 150) for 'depart' and finally vanish at the 'exit' point (350, 50).
+
+*(Note: We added an 'exit' event here, which wasn't in the Chapter 2 log but is often added automatically by `vidigi`'s internal processing to ensure entities cleanly leave the screen).*
+
+## Using the Blueprint
+
+You provide this `event_position_df` (our `my_layout` variable) directly to the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function:
+
+```python
+# (Assuming my_event_log and scenario_details from Chapter 1 & 2 exist)
+from vidigi.animation import animate_activity_log
+
+# --- Our layout from above ---
+# my_layout = pd.DataFrame(...)
+
+# --- Pretend we have these ---
+# my_event_log = pd.DataFrame(...) from Chapter 2
+# class SimpleScenario: n_cubicles = 2 # From Chapter 1 layout example
+# scenario_details = SimpleScenario()
+
+# --- Call the animation function ---
+my_animation = animate_activity_log(
+    event_log=my_event_log,
+    event_position_df=my_layout,  # <-- Pass the layout here!
+    scenario=scenario_details,   # <-- Needed for resource counts ('n_cubicles')
+    # ... other options like time_display_units, icon_size etc.
+)
+
+# my_animation.show()
+```
+
+When you run this, `vidigi` uses `my_layout` to determine where to draw everything. Patients arrive near (50, 200), queue leftwards from (200, 250), occupy one of the (in this case 2) treatment slots near (200, 150), and then depart via (350, 150) and (350, 50).
+
+## How `vidigi` Reads the Blueprint (Under the Hood)
+
+You don't usually need to worry about the deep internals, but it helps to understand the basics. When `animate_activity_log` needs to figure out the exact position of every patient at every snapshot in time, it uses a helper function called [`generate_animation_df`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd).
+
+Here's a simplified idea of what `generate_animation_df` does:
+
+1.  **Get Base Position:** For a patient `P` whose current `event` is, say, `'start_wait'` at time `T`, it looks up `'start_wait'` in the `event_position_df` to find the base coordinates (e.g., X=200, Y=250).
+2.  **Handle Queues:** If the `event_type` is `'queue'`, it checks how many other patients are also in the `'start_wait'` state at time `T`. It calculates an offset (usually moving left and wrapping to new rows if needed) from the base (X, Y) based on the patient's position in the queue.
+3.  **Handle Resources:** If the `event_type` is `'resource_use'` (like `'treatment_begins'`), it checks the `resource` column in `event_position_df` (e.g., `'n_cubicles'`). It then asks the `scenario` object, "How many `n_cubicles` are there?". It also looks at the patient's specific `resource_id` from the event log (e.g., they are using cubicle `1`). It then calculates the exact position for cubicle `1` relative to the base (X, Y) for `'treatment_begins'`.
+4.  **Assign Final Position:** It stores these calculated (X, Y) coordinates for patient `P` at time `T`.
+
+This process repeats for every patient at every time snapshot.
+
+Here's a simplified diagram showing the interaction:
+
+```{mermaid}
+sequenceDiagram
+    participant AAL as animate_activity_log
+    participant GAD as generate_animation_df
+    participant Layout as event_position_df (The Blueprint)
+    participant Log as Event Log
+    participant Scenario as scenario object
+
+    AAL->>GAD: Calculate positions for all patients at all times
+    GAD->>Log: Get patient P's event & resource_id at time T
+    GAD->>Layout: Get base (x, y) & resource name for event
+    alt Event is Resource Use
+        GAD->>Scenario: Get total count for resource name
+        GAD->>GAD: Calculate position based on base(x,y), resource_id, total count
+    else Event is Queue
+        GAD->>GAD: Calculate queue position offset from base(x,y)
+    else Event is Arrival/Depart
+        GAD->>GAD: Use base(x,y) directly
+    end
+    GAD-->>AAL: Return DataFrame with calculated positions
+```
+
+## Tips for Setting Up Your Layout
+
+*   **Match Event Names:** The `event` names in `event_position_df` *must exactly match* the `event` names used in your `event_log`.
+*   **Coordinates are Anchors:** Remember (X, Y) are often the *bottom-right* anchor for queues and resources, which typically extend leftwards and potentially upwards in rows.
+*   **Use `setup_mode`:** When first creating your layout, pass `setup_mode=True` to `animate_activity_log`. This will display grid lines and coordinate axes on the animation, making it much easier to figure out good X and Y values!
+*   **Iterate:** Getting the layout perfect often takes a few tries. Run the animation, see how it looks, adjust the X/Y values in your DataFrame, and run it again.
+
+## Conclusion
+
+The `event_position_df` is your essential blueprint for the visual layout of your `vidigi` animation. It's a simple table (DataFrame) that tells `vidigi` the base (X, Y) coordinates for each key event, allows you to add descriptive labels, and connects resource-using events to their capacities defined in a `scenario` object. By carefully crafting this layout, you control where queues form, where resources are located, and how entities move across the screen, turning your raw event data into an understandable visual story.
+
+Now that we understand the *script* (`event_log`) and the *stage map* (`event_position_df`), we need to look closer at the *actors* that use specific props – the resources. How does `vidigi` handle knowing exactly *which* cubicle or *which* nurse a patient is using? That involves enhancing how we define and use resources in our simulation model, which is the topic of our next chapter.
+
+Next up: [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

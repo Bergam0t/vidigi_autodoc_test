@@ -1,0 +1,156 @@
+# Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)
+
+In [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd), we learned how to make sure our simulation records *which specific* resource (like Cubicle 1 vs. Cubicle 2) each patient is using. This gives us a detailed [Event Log](02_event_log_.qmd), the script of our process. We also have our stage map, the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+
+But how do we turn this script and map into an actual movie? A movie isn't just a list of events; it's a series of frames, or snapshots, showing where everyone is at specific moments in time. This chapter explores how `vidigi` prepares these snapshots.
+
+## From Diary to Flipbook: The Need for Snapshots
+
+Think about the [Event Log](02_event_log_.qmd). It's like a detailed diary:
+*   9:00 AM: Alice arrived.
+*   9:01 AM: Alice started waiting.
+*   9:15 AM: Alice started treatment (Cubicle 1).
+*   9:30 AM: Alice finished treatment.
+*   9:31 AM: Alice departed.
+
+This tells us *when things change*. But an animation needs to show the state of the system at regular intervals, say, every 5 minutes. What was happening at 9:05 AM? What about 9:10 AM?
+
+We need to transform our event-based diary into a "flipbook" where each page shows the location and status of *everyone* at a specific time (e.g., 9:00, 9:05, 9:10, 9:15...). This process involves two main steps, handled by two helper functions within `vidigi`:
+
+1.  **`reshape_for_animations`**: Figures out *who* is doing *what* at each snapshot time. (Like sketching the characters and their basic activity on each flipbook page).
+2.  **`generate_animation_df`**: Calculates the *exact (X, Y) screen coordinates* for each character on each page, arranging them neatly in queues or placing them at specific resource spots. (Like precisely positioning the sketches on the page according to layout rules).
+
+These functions usually work behind the scenes when you call the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function (the "Easy Button" from Chapter 1). You typically don't need to call them yourself, but understanding them helps you see how the animation is built.
+
+## Step 1: Creating Time Slices (`reshape_for_animations`)
+
+**Goal:** To determine the status (event, event type, resource used) of every entity at regular time intervals.
+
+Imagine you have your event log diary. `reshape_for_animations` acts like someone reading the diary and creating a summary for specific times. You tell it how often to take a snapshot using the `every_x_time_units` parameter (e.g., `every_x_time_units=5` means take a snapshot every 5 minutes).
+
+**How it works (conceptually):**
+
+1.  **Look at a Snapshot Time:** It starts at time 0, then time 5, then time 10, and so on, up to a specified limit (`limit_duration`).
+2.  **Find Active Patients:** For each snapshot time (say, minute 10), it looks at the [Event Log](02_event_log_.qmd) to find all patients who have `arrival` time <= 10 AND (`depart` time >= 10 OR `depart` time is missing). These are the patients currently "in the system".
+3.  **Find Latest Status:** For each of these active patients, it finds the *most recent event* that happened at or before the current snapshot time (minute 10). For example, if Alice arrived at 0 and started waiting at 1, her status at minute 10 is still 'start_wait'. If Bob arrived at 2 and started treatment (Resource 2) at 8, his status at minute 10 is 'start_treat' using Resource 2.
+4.  **Rank Entities:** If multiple patients are in the same state (e.g., multiple people waiting), it ranks them based on when they entered that state. This "rank" is important for positioning them later (e.g., first in line, second in line).
+5.  **Record Snapshot:** It records this information (patient ID, event, event type, resource ID if applicable, rank) for the current snapshot time.
+6.  **Repeat:** It does this for every snapshot time interval.
+7.  **Add Exit:** It adds a final 'exit' event for each patient slightly after their last recorded event to make them disappear cleanly from the animation.
+
+**Input:** A simplified [Event Log](02_event_log_.qmd) DataFrame:
+
+```python
+# event_log (from Chapter 2)
+#    patient       event_type        event  time  resource_id
+# 0        1  arrival_departure      arrival     0          NaN
+# 1        1              queue   start_wait     0          NaN
+# 2        1       resource_use  start_treat     5          1.0  # Used resource 1
+# 3        1  arrival_departure       depart    15          NaN
+# 4        2  arrival_departure      arrival     2          NaN
+# 5        2              queue   start_wait     2          NaN
+# 6        2       resource_use  start_treat     8          2.0  # Used resource 2
+# 7        2  arrival_departure       depart    20          NaN
+```
+
+**Output:** A "reshaped" DataFrame (let's assume `every_x_time_units=5`):
+
+```
+# Output of reshape_for_animations (simplified)
+#    minute  patient       event_type        event  resource_id  rank
+# 0       0        1  arrival_departure      arrival          NaN   1.0 # At minute 0, Patient 1 arrived
+# 1       0        1              queue   start_wait          NaN   1.0 # Immediately started waiting
+# 2       5        1       resource_use  start_treat          1.0   1.0 # At minute 5, Patient 1 started treatment (Resource 1)
+# 3       5        2              queue   start_wait          NaN   1.0 # At minute 5, Patient 2 was waiting (arrived at 2)
+# 4      10        1       resource_use  start_treat          1.0   1.0 # At minute 10, Patient 1 still treating
+# 5      10        2       resource_use  start_treat          2.0   1.0 # At minute 10, Patient 2 started treatment (Resource 2)
+# 6      15        1  arrival_departure       depart          NaN   1.0 # At minute 15, Patient 1 departed
+# 7      15        2       resource_use  start_treat          2.0   1.0 # At minute 15, Patient 2 still treating
+# 8      20        2  arrival_departure       depart          NaN   1.0 # At minute 20, Patient 2 departed
+# ... (plus added 'exit' events shortly after depart)
+```
+Notice how this table tells us the state of *both* patients at each 5-minute interval (`minute` column). The `rank` column tells us their order within that state at that time (here, they are mostly alone in their state, so rank is 1.0).
+
+**(Code Reference:** The actual logic lives in the `reshape_for_animations` function within the `vidigi/prep.py` file.)
+
+## Step 2: Calculating Positions (`generate_animation_df`)
+
+**Goal:** To calculate the precise (X, Y) screen coordinates for every entity in every snapshot, based on their status and the layout rules.
+
+Now we have our flipbook pages sketched (`reshape_for_animations` output), but the characters are just listed, not positioned. `generate_animation_df` takes these sketches and the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) (our stage map) and figures out exactly where to draw everyone.
+
+**How it works (conceptually):**
+
+1.  **Take a Snapshot Row:** It looks at each row from the `reshape_for_animations` output (e.g., "At minute 5, Patient 2 was `start_wait`, rank 1.0").
+2.  **Find Base Position:** It looks up the `event` ('start_wait') in the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) to get the base anchor coordinates (e.g., X=200, Y=250 from Chapter 3's example).
+3.  **Apply Layout Rules:**
+    *   **If it's a Queue (`event_type` == 'queue'):** It uses the patient's `rank` (1.0 in this case) and parameters like `wrap_queues_at` and `gap_between_entities` to calculate an offset from the base (X, Y). Rank 1 might be right at the base (X=200), Rank 2 might be slightly to the left (X = 200 - `gap_between_entities`), and so on, potentially wrapping to a new row above.
+    *   **If it's Resource Use (`event_type` == 'resource_use'):** It uses the patient's specific `resource_id` (e.g., Resource 1 or Resource 2 from the `reshape_for_animations` output) and parameters like `wrap_resources_at` and `gap_between_resources` to calculate the position relative to the base (X, Y) defined for that resource event in the layout. Resource 1 might be at (X - `gap_between_resources` * 1), Resource 2 at (X - `gap_between_resources` * 2), etc., potentially wrapping.
+    *   **If it's Arrival/Departure:** It typically just uses the base (X, Y) directly.
+4.  **Assign Icon:** It picks an icon (like an emoji 👩🏽‍⚕️, 👨‍💻, 🏭) for the patient, making sure each unique patient gets the same icon throughout the animation.
+5.  **Record Final Position:** It stores the calculated `x_final`, `y_final`, and `icon` along with the original snapshot information.
+
+**Input:**
+*   The reshaped DataFrame from `reshape_for_animations`.
+*   The [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+
+**Output:** The final "animation-ready" DataFrame. This contains everything needed to draw each frame: the time (`minute`), who (`patient`), their icon (`icon`), their exact position (`x_final`, `y_final`), and hover text (`label`).
+
+```python
+# Output of generate_animation_df (simplified, adding X/Y and icons)
+#    minute  patient       event_type        event  resource_id  rank  x_final  y_final      icon                       label
+# 0       0        1  arrival_departure      arrival          NaN   1.0     50.0    200.0       '🧔🏼'                  'Entrance' # At base X/Y for arrival
+# 1       0        1              queue   start_wait          NaN   1.0    200.0    250.0       '🧔🏼'              'Waiting Area' # At base X/Y for queue (rank 1)
+# 2       5        1       resource_use  start_treat          1.0   1.0    190.0    150.0       '🧔🏼'            'Treatment Bays' # Offset for resource 1 (base X=200, Y=150)
+# 3       5        2              queue   start_wait          NaN   1.0    200.0    250.0       '👨🏿‍🦯'              'Waiting Area' # At base X/Y for queue (rank 1)
+# 4      10        1       resource_use  start_treat          1.0   1.0    190.0    150.0       '🧔🏼'            'Treatment Bays' # Still at resource 1 spot
+# 5      10        2       resource_use  start_treat          2.0   1.0    180.0    150.0       '👨🏿‍🦯'            'Treatment Bays' # Offset for resource 2
+# 6      15        1  arrival_departure       depart          NaN   1.0    350.0    150.0       '🧔🏼'                 'Discharge' # At base X/Y for depart
+# 7      15        2       resource_use  start_treat          2.0   1.0    180.0    150.0       '👨🏿‍🦯'            'Treatment Bays' # Still at resource 2 spot
+# 8      20        2  arrival_departure       depart          NaN   1.0    350.0    150.0       '👨🏿‍🦯'                 'Discharge' # At base X/Y for depart
+# ... (plus 'exit' events)
+```
+This final table is the direct input for the animation engine itself.
+
+**(Code Reference:** The actual logic lives in the `generate_animation_df` function within the `vidigi/prep.py` file.)
+
+## How They Work Together
+
+The main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function orchestrates these two steps before creating the final animation:
+
+```{mermaid}
+sequenceDiagram
+    participant User
+    participant AAL as animate_activity_log
+    participant RFA as reshape_for_animations
+    participant GAD as generate_animation_df
+    participant GA as generate_animation (Chapter 6)
+
+    User->>AAL: Call with event_log, layout, options
+    AAL->>RFA: Pass event_log, time interval (every_x_time_units)
+    RFA-->>AAL: Return reshaped_df (time slices)
+    AAL->>GAD: Pass reshaped_df, layout, queue/resource rules
+    GAD-->>AAL: Return animation_df (with X, Y, icons)
+    AAL->>GA: Pass animation_df, display options
+    GA-->>AAL: Return Plotly Figure
+    AAL-->>User: Return Plotly Figure
+```
+
+First, `reshape_for_animations` processes the raw log into time slices. Then, `generate_animation_df` takes those slices and calculates the precise visual positions using the layout map.
+
+## Conclusion
+
+Snapshot preparation is the crucial data transformation stage in `vidigi`. It bridges the gap between the raw, event-based simulation log and the frame-by-frame data needed for animation.
+
+*   **`reshape_for_animations`** acts like a scribe, turning the event diary into a flipbook summary by figuring out who is doing what at regular time intervals.
+*   **`generate_animation_df`** acts like an artist, taking the flipbook summary and the stage map (`event_position_df`) to calculate the exact (X, Y) coordinates for every character on every page, respecting queueing and resource layout rules.
+
+Together, they produce a detailed DataFrame where each row represents an entity at a specific time with a specific icon and screen position. This prepared data is now ready to be fed into the final animation engine.
+
+How does `vidigi` take this final DataFrame and actually draw the moving pictures using Plotly? That's what we'll explore in the next chapter!
+
+Next up: [Chapter 6: Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

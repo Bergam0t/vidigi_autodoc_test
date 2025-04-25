@@ -1,0 +1,125 @@
+# Chapter 2: Event Log
+
+In [Chapter 1: Animation Facade (`animate_activity_log`)](01_animation_facade_animate_activity_log_.qmd), we learned about the "Easy Button" `animate_activity_log` function. We saw that it needs two main ingredients: the "What happened?" data and the "Where should things be?" layout.
+
+This chapter focuses on the first ingredient: the **Event Log**. It's the heart of your simulation data and tells `vidigi` exactly what happened, to whom, and when.
+
+## The Story of Your Process: Why We Need an Event Log
+
+Imagine you're trying to make a movie about a busy day at a small clinic. To show what happened accurately, you wouldn't just film random moments. You'd need a detailed script or a logbook tracking each patient:
+
+*   *When* did Patient Alice arrive? (9:00 AM)
+*   *When* did she start waiting in the waiting room? (9:01 AM)
+*   *When* did Nurse Bob become free? (9:15 AM)
+*   *When* did Alice start her consultation with Nurse Bob? (9:15 AM)
+*   *When* did the consultation end? (9:30 AM)
+*   *When* did Alice leave the clinic? (9:31 AM)
+
+And you'd need this information for *every* patient (Alice, Charlie, David...).
+
+That's precisely what the **Event Log** provides for `vidigi`. It's like a detailed diary or logbook for your simulated system (like the clinic, a factory line, a call center, etc.). It tracks every important step or "event" for each "patient" or "entity" as it moves through the process. Without this detailed sequence, `vidigi` wouldn't know how to create the animation!
+
+## What Does an Event Log Look Like?
+
+The Event Log is essentially a table, most commonly represented as a `pandas` DataFrame in Python. Think of it like a spreadsheet where each row represents a significant moment (an event) that occurred.
+
+To work correctly with `vidigi`, this table *must* have specific columns:
+
+*   **`patient`**: This column identifies *who* the event happened to. It could be a patient ID number, a customer name, a product code – whatever uniquely identifies the entity moving through your system.
+*   **`event_type`**: This tells `vidigi` the *kind* of event that occurred. It's a broad category. The main types are:
+    *   `arrival_departure`: The entity entered or exited the system.
+    *   `queue`: The entity started waiting in a line or area.
+    *   `resource_use`: The entity started using a specific resource (like a nurse, a machine, a checkout counter).
+    *   `resource_use_end`: The entity finished using that specific resource.
+*   **`event`**: This gives the *specific name* of the event. For arrivals and departures, this *must* be exactly `'arrival'` or `'depart'`. For queues and resource use, you can define custom names (like `'start_wait_room'`, `'begin_treatment'`, `'end_checkout'`).
+*   **`time`**: This records *when* the event happened, usually as a number representing the simulation time (e.g., minutes or hours from the start).
+
+And one more, which is needed only for specific `event_type`s:
+
+*   **`resource_id`**: When an entity starts or stops using a *specific* resource (like Treatment Room **1** vs Treatment Room **2**), this column tells `vidigi` *which one* it was. This is only required for `event_type` `'resource_use'` and `'resource_use_end'`.
+
+You might also see other helpful columns like:
+
+*   `pathway`: If your system has different routes entities can take, this might label the specific path.
+*   `run`: If you run your simulation multiple times, this identifies which run the event belongs to.
+
+## A Simple Example
+
+Let's look at a small, simplified Event Log DataFrame, similar to the one we saw in Chapter 1:
+
+```python
+import pandas as pd
+
+# Create a simple Event Log as a pandas DataFrame
+event_log_data = {
+    'patient': [1, 1, 1, 1, 2, 2, 2, 2],
+    'event_type': ['arrival_departure', 'queue', 'resource_use', 'arrival_departure',
+                   'arrival_departure', 'queue', 'resource_use', 'arrival_departure'],
+    'event': ['arrival', 'start_wait', 'start_treat', 'depart',
+              'arrival', 'start_wait', 'start_treat', 'depart'],
+    'time': [0, 0, 5, 15, 2, 2, 8, 20],
+    'resource_id': [None, None, 1, None, None, None, 2, None], # Note: Only filled for 'resource_use'
+    'pathway': ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A'], # Optional: All follow Pathway A
+    'run': [1, 1, 1, 1, 1, 1, 1, 1] # Optional: All from Run 1
+}
+my_event_log = pd.DataFrame(event_log_data)
+
+print(my_event_log)
+```
+
+**Output:**
+
+```
+   patient       event_type        event  time  resource_id pathway  run
+0        1  arrival_departure      arrival     0          NaN       A    1
+1        1              queue   start_wait     0          NaN       A    1
+2        1       resource_use  start_treat     5          1.0       A    1  # Used resource 1
+3        1  arrival_departure       depart    15          NaN       A    1
+4        2  arrival_departure      arrival     2          NaN       A    1
+5        2              queue   start_wait     2          NaN       A    1
+6        2       resource_use  start_treat     8          2.0       A    1  # Used resource 2
+7        2  arrival_departure       depart    20          NaN       A    1
+```
+
+Let's break down what this log tells `vidigi`:
+
+1.  **Row 0:** Patient `1` `arrival` occurred (`event_type` `arrival_departure`) at `time` 0.
+2.  **Row 1:** Patient `1` started waiting (`event` `start_wait`, `event_type` `queue`) also at `time` 0.
+3.  **Row 2:** Patient `1` started treatment (`event` `start_treat`, `event_type` `resource_use`) at `time` 5. Crucially, it used resource `1` (`resource_id` is 1.0).
+4.  **Row 3:** Patient `1` left the system (`event` `depart`, `event_type` `arrival_departure`) at `time` 15.
+5.  **Row 4:** Patient `2` `arrival` occurred at `time` 2.
+6.  ...and so on for Patient 2, who used resource `2`.
+
+Notice how `resource_id` is only filled in when the `event_type` is `resource_use`. We'd also need it for `resource_use_end` events (which aren't shown in this *very* simplified example, but are important in real logs!).
+
+## How `vidigi` Uses the Event Log
+
+This log is the raw material. When you call `animate_activity_log` (or the helper functions it uses, like [`reshape_for_animations`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)), `vidigi` reads this table.
+
+It essentially "plays back" the log, figuring out: "At time 0, who was where? At time 1? At time 2?..." It uses the `time` column to order events and the `event_type` and `event` columns to understand what state each `patient` is in at any given moment. The `resource_id` helps it place patients at the correct resource spot in the animation.
+
+Think of `vidigi` as an animator reading the script (the Event Log) frame by frame to draw the movie. The more accurate and detailed your Event Log, the better your final animation will be!
+
+## Where Do Event Logs Come From?
+
+You typically don't create these logs by hand! They are usually generated automatically:
+
+1.  **Simulation Models:** Software like SimPy (often used with `vidigi`) or Ciw can be programmed to record these events automatically as the simulation runs. You add small "logging" snippets to your simulation code at key points (like when a patient arrives, requests a resource, etc.).
+    *   `vidigi` provides helpers to make this easier, like [`CustomResource`](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd) and [`populate_store`](04_simpy_resource_enhancement___customresource____store____populate_store___.qmd) for SimPy.
+    *   There's even a utility (`utils.event_log_from_ciw_recs`) to convert logs from the Ciw library.
+    *   An example of adding logging to a SimPy model can be found in the documentation (`vidigi_docs/adding_vidigi_to_a_simple_simpy_model_hsma_structure.qmd`).
+2.  **Real-World Data:** Sometimes, you might have data logs from real systems (like timestamped entries in a hospital database or factory sensor readings). You would need to process this data into the specific `vidigi` Event Log format (with the required columns).
+
+## Conclusion
+
+The Event Log is the fundamental data input for `vidigi`. It's a structured table (usually a pandas DataFrame) that acts like a detailed diary, recording every significant moment (`event`, `event_type`) for each entity (`patient`) at a specific `time`, sometimes involving a particular `resource_id`.
+
+`vidigi` reads this log to reconstruct the system's dynamics and create the animation. Getting this log right is the first crucial step!
+
+Now that we understand *what* happened (the Event Log), how do we tell `vidigi` *where* these events should appear on the screen? That's the job of the Layout Configuration, which we'll explore next.
+
+Next up: [Chapter 3: Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

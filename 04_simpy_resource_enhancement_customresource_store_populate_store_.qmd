@@ -1,0 +1,218 @@
+# Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)
+
+In [Chapter 3: Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd), we learned how to create a blueprint (`event_position_df`) that tells `vidigi` *where* to place entities on the screen for different events like waiting or using a resource. We saw that for resource steps (like "Treatment Bays"), `vidigi` needs to know how many resource slots are available.
+
+But there's a subtle challenge: how does `vidigi` know if Patient Alice is always using *Treatment Bay 1* throughout her treatment, or if she magically swaps places with Patient Bob in Bay 2 halfway through? For a clear animation, we want to see Alice consistently stay in Bay 1.
+
+This chapter explains how `vidigi` handles this using a special pattern when you build your simulation model with the popular library SimPy.
+
+## The Problem: SimPy Resources Don't Have Names (IDs)
+
+Imagine a small clinic with two identical treatment rooms (Room A and Room B). SimPy, a library often used to create the simulation data that `vidigi` visualizes, has a concept called `simpy.Resource` to represent things like these rooms.
+
+You can tell SimPy "I have 2 treatment rooms". When a patient needs a room, SimPy can tell you "Okay, *a* room is available". But it doesn't inherently tell you *which* room (A or B) the patient got.
+
+If Patient Alice gets a room, and later Patient Bob gets a room, the simulation knows *two* rooms are busy. But the standard event log might just say:
+*   Time 5: Alice starts using *a* room.
+*   Time 8: Bob starts using *a* room.
+
+When `vidigi` reads this, it doesn't know if Alice is in Room A and Bob in Room B, or vice-versa. In the animation, Alice might appear in the spot for Room A in one frame and Room B in the next, which looks confusing!
+
+We need a way to give each individual resource (each room, each nurse, each machine) a unique ID, like giving each worker a specific ID badge.
+
+## The Solution: `Store`, `CustomResource`, and `populate_store`
+
+`vidigi` uses a clever workaround combined with helpers provided in its `utils` module:
+
+1.  **`simpy.Store`**: Instead of using `simpy.Resource` directly to represent the *pool* of treatment rooms, we use a `simpy.Store`. Think of a `Store` like a container or a shelf that can hold individual items. Our "shelf" will hold our individual, identifiable treatment rooms.
+
+2.  **`vidigi.utils.CustomResource`**: We need items to put *in* the `Store`. We can't just put standard `simpy.Resource` objects in there, because they still lack IDs. So, `vidigi` provides `CustomResource`. It's almost identical to a `simpy.Resource`, but with one crucial addition: an `id_attribute`. This is our ID badge! Each `CustomResource` instance we create will represent one specific treatment room (like Room A or Room B) and will have its own unique ID.
+
+3.  **`vidigi.utils.populate_store`**: Manually creating each `CustomResource` (each nurse, each room) and putting it into the `Store` can be repetitive. `vidigi` provides a helper function, `populate_store`, that does this for you. You tell it how many resources you need (e.g., 2 treatment rooms), which `Store` to put them in, and it automatically creates the right number of `CustomResource` objects, assigns them unique IDs (like 1, 2), and puts them into the `Store`.
+
+**Analogy:**
+*   Imagine you have 3 nurses (`num_resources = 3`).
+*   The `simpy.Store` is the Nurses' Station (`simpy_store`).
+*   `CustomResource` is a Nurse object that includes an ID badge (`id_attribute`).
+*   `populate_store` is the supervisor who hires 3 nurses, gives them badges labelled "Nurse 1", "Nurse 2", "Nurse 3", and tells them to wait at the Nurses' Station (`simpy_store`).
+
+## How to Use This Pattern in Your SimPy Model
+
+Let's see how you'd modify a typical SimPy model setup.
+
+**1. Before (Using `simpy.Resource`):**
+
+```python
+# --- In your Model's __init__ or resource setup ---
+import simpy
+
+# Assume 'self.env' is your simpy.Environment
+# Assume 'g.n_cubicles' holds the number of cubicles (e.g., 2)
+# self.treatment_cubicles = simpy.Resource(self.env, capacity=g.n_cubicles)
+
+# --- In your SimPy process function (e.g., attend_clinic) ---
+# def attend_clinic(self, patient):
+    # ... other code ...
+
+    # Request *a* cubicle
+    # with self.treatment_cubicles.request() as req:
+    #     yield req
+        # --- Log the start of treatment ---
+        # (Problem: No specific cubicle ID here!)
+        # self.event_log.append({
+        #     'patient': patient.identifier,
+        #     'event': 'treatment_begins',
+        #     'event_type': 'resource_use',
+        #     'time': self.env.now,
+        #     'resource_id': None # <--- We don't know which one!
+        # })
+
+        # yield self.env.timeout(treatment_duration)
+        # --- Log the end of treatment ---
+        # (Still no specific ID)
+
+    # ... other code ...
+```
+This code works for SimPy, but it doesn't log the specific `resource_id` needed by `vidigi`.
+
+**2. After (Using `Store`, `CustomResource`, `populate_store`):**
+
+```python
+# --- Add imports at the top of your file ---
+import simpy
+from vidigi.utils import CustomResource, populate_store # Import helpers
+
+# --- In your Model's __init__ or resource setup ---
+# Assume 'self.env' is your simpy.Environment
+# Assume 'g.n_cubicles' holds the number of cubicles (e.g., 2)
+
+# 1. Create an empty Store instead of a Resource
+self.treatment_cubicles_store = simpy.Store(self.env)
+
+# 2. Use populate_store to fill it with ID'd CustomResources
+populate_store(
+    num_resources=g.n_cubicles,             # How many cubicles?
+    simpy_store=self.treatment_cubicles_store, # Which store to fill?
+    sim_env=self.env                        # The SimPy environment
+)
+
+# --- In your SimPy process function (e.g., attend_clinic) ---
+# def attend_clinic(self, patient):
+    # ... other code ...
+
+    # Request a SPECIFIC cubicle FROM THE STORE
+    # Note: We use .get() on the store, not .request()
+    print(f"Patient {patient.identifier} waiting for cubicle...")
+    specific_cubicle = yield self.treatment_cubicles_store.get()
+    print(f"Patient {patient.identifier} got cubicle {specific_cubicle.id_attribute}")
+
+    # --- Log the start of treatment ---
+    # Now we can log the SPECIFIC ID!
+    self.event_log.append({
+        'patient': patient.identifier,
+        'event': 'treatment_begins',
+        'event_type': 'resource_use',
+        'time': self.env.now,
+        'resource_id': specific_cubicle.id_attribute # <-- Success!
+    })
+
+    # Simulate treatment time
+    # yield self.env.timeout(treatment_duration)
+
+    # --- Log the end of treatment ---
+    # Also log the specific ID here
+    self.event_log.append({
+        'patient': patient.identifier,
+        'event': 'treatment_complete',
+        'event_type': 'resource_use_end',
+        'time': self.env.now,
+        'resource_id': specific_cubicle.id_attribute # <-- Consistent ID!
+    })
+
+    # IMPORTANT: Put the specific cubicle BACK INTO THE STORE
+    print(f"Patient {patient.identifier} releasing cubicle {specific_cubicle.id_attribute}")
+    yield self.treatment_cubicles_store.put(specific_cubicle)
+
+    # ... other code ...
+```
+
+**Key Changes:**
+
+*   We replaced `simpy.Resource` with `simpy.Store`.
+*   We used `populate_store` to fill the store initially.
+*   We replaced `resource.request()` with `store.get()`. This yields the *actual* `CustomResource` object (our specific cubicle).
+*   We accessed `specific_cubicle.id_attribute` to get the unique ID for logging in the [Event Log](02_event_log_.qmd).
+*   Crucially, after finishing, we used `store.put(specific_cubicle)` to return that specific cubicle back to the store, making it available for others.
+
+Now, when `vidigi` processes the event log, it sees entries like `resource_id: 1` or `resource_id: 2`. When combined with the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) which defines the base position for "treatment_begins" and knows there are 2 cubicles, `vidigi` can calculate the exact position for "Cubicle 1" and "Cubicle 2". If Patient Alice consistently logs `resource_id: 1`, she will always be shown in the animation at the spot calculated for Cubicle 1!
+
+## What's Happening Under the Hood?
+
+Conceptually, this pattern allows us to track individual resources:
+
+```{mermaid}
+sequenceDiagram
+    participant P as Patient Entity
+    participant S as Treatment Cubicle Store (simpy.Store)
+    participant C1 as Cubicle 1 (CustomResource, ID=1)
+    participant C2 as Cubicle 2 (CustomResource, ID=2)
+    participant Log as Event Log
+
+    Note over S, C1, C2: Store initially contains C1 and C2
+    P->>S: Request a cubicle (.get())
+    S->>P: Give Cubicle 1 (C1)
+    P->>Log: Record 'treatment_begins', resource_id=1
+    Note over P: Uses Cubicle 1 for some time...
+    P->>Log: Record 'treatment_complete', resource_id=1
+    P->>S: Return Cubicle 1 (.put(C1))
+    Note over S, C1, C2: Store now contains C1 and C2 again
+```
+
+The `populate_store` function itself is quite simple. Looking inside `vidigi/utils.py`, it essentially does this:
+
+```python
+# Simplified view of populate_store
+def populate_store(num_resources, simpy_store, sim_env):
+    """Fills a store with uniquely ID'd CustomResource objects."""
+    for i in range(num_resources):
+        # Create a CustomResource, giving it an ID (1, 2, 3...)
+        resource_with_id = CustomResource(
+            sim_env,
+            capacity=1,         # Usually, each item has capacity 1
+            id_attribute = i+1  # Assign ID: 1, 2, 3,...
+        )
+        # Put this specific resource into the store
+        simpy_store.put(resource_with_id)
+```
+
+And the `CustomResource` class in `vidigi/utils.py` is just a standard `simpy.Resource` with an extra attribute added during initialization:
+
+```python
+# Simplified view of CustomResource
+import simpy
+
+class CustomResource(simpy.Resource):
+    """A simpy.Resource with an added id_attribute."""
+    def __init__(self, env, capacity, id_attribute=None):
+        # Call the original SimPy Resource setup
+        super().__init__(env, capacity)
+        # Add our custom ID badge!
+        self.id_attribute = id_attribute
+    # (Request and release methods are inherited, no changes needed here)
+```
+
+By combining these simple pieces (`Store`, `CustomResource`, `populate_store`), we achieve the goal: logging specific resource IDs so `vidigi` can create clear and consistent animations.
+
+## Conclusion
+
+We've learned that standard SimPy resources lack unique IDs, which poses a challenge for visualizing which specific resource an entity is using over time. `vidigi` overcomes this by using a pattern involving `simpy.Store` as a container, `vidigi.utils.CustomResource` as resources *with* ID badges (`id_attribute`), and `vidigi.utils.populate_store` to easily set them up.
+
+By modifying your SimPy model to use `.get()` on the store, logging the `resource.id_attribute`, and using `.put()` to return the resource, you provide `vidigi` with the crucial `resource_id` information needed in the [Event Log](02_event_log_.qmd). This allows `vidigi` to track entity-resource interactions precisely and render them consistently in the final animation.
+
+With the event log prepared (Chapter 2), the layout defined (Chapter 3), and our resources properly identified (this Chapter), we now have all the raw ingredients. The next step is to prepare this data for the animation frames. How does `vidigi` figure out exactly where everyone is at *every single moment* in time?
+
+Next up: [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

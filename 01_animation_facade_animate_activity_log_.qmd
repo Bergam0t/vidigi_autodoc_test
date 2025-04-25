@@ -1,0 +1,141 @@
+# Chapter 1: Animation Facade (`animate_activity_log`)
+
+Welcome to `vidigi`! If you've ever watched a simulation of people moving through a hospital, a queue at a shop, or any process, you know how helpful visualizations can be. `vidigi` is designed to help you create exactly those kinds of animations from your process data.
+
+But creating animations can seem complicated, right? You need to track where everyone is at every moment, figure out their positions on the screen, and then stitch it all together. It sounds like a lot of work!
+
+That's where `animate_activity_log` comes in. Think of it as the **"Easy Button"** for creating your `vidigi` animations.
+
+## The "Easy Button" Concept
+
+Imagine you're directing a movie. You have actors (your data points, like patients), a script (the sequence of events), and a set (the layout on the screen). As the director, you don't need to personally handle the camera, the lighting, *and* the sound – you coordinate specialists who do that.
+
+`animate_activity_log` is like that director. It's the main, high-level function you'll usually interact with. You give it the raw information:
+
+1.  **What happened?** The sequence of events (like patient arrivals, waiting, treatment). This is called the [Event Log](02_event_log_.qmd).
+2.  **Where should things be?** The layout or map showing where different activities (like the waiting room or treatment cubicle) appear on the screen. This is the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+3.  **Optional Details:** Extra information, like how many nurses are available (we call this `scenario` info), and how you want the animation to look (speed, icons, background image, etc.).
+
+You provide these inputs, and `animate_activity_log` coordinates all the underlying steps needed to produce the final, animated movie (a Plotly figure). It simplifies the whole process for you!
+
+## How to Use `animate_activity_log` (A Simple Example)
+
+Let's say you have your data ready in two tables (we'll learn how to make these in later chapters!):
+
+*   `my_event_log`: A table listing every time a patient arrived, started waiting, got treated, etc.
+*   `my_layout`: A table defining the (x, y) coordinates on the screen for "Arrival", "Waiting Area", "Treatment Room", and "Exit".
+
+Using `animate_activity_log` is straightforward:
+
+```python
+# Import the function first
+from vidigi.animation import animate_activity_log
+import pandas as pd # We'll use pandas DataFrames
+
+# --- Pretend we have these already ---
+# (Chapters 2 & 3 will show how to create these!)
+my_event_log = pd.DataFrame({ # A simplified example log
+    'patient': [1, 1, 1, 1, 2, 2, 2, 2],
+    'event': ['arrival', 'start_wait', 'start_treat', 'depart',
+              'arrival', 'start_wait', 'start_treat', 'depart'],
+    'time': [0, 0, 5, 15, 2, 2, 8, 20],
+    # ... other columns needed like event_type, pathway, resource_id ...
+    'event_type': ['arrival_departure','queue','resource_use','arrival_departure',
+                   'arrival_departure','queue','resource_use','arrival_departure'],
+    'pathway': ['A','A','A','A', 'A','A','A','A'],
+    'resource_id': [None, None, 1, None, None, None, 2, None],
+    'run': [1,1,1,1, 1,1,1,1]
+})
+
+my_layout = pd.DataFrame({ # A simplified example layout
+    'event': ['arrival', 'start_wait', 'start_treat', 'depart'],
+    'x': [10, 50, 100, 150],
+    'y': [50, 50, 50, 50],
+    'label': ['Arrival', 'Waiting', 'Treatment', 'Exit'], # Human-readable names
+    'resource': [None, None, 'treatment_rooms', None] # Link resource events to capacity
+})
+
+# --- A simple scenario object (optional) ---
+class SimpleScenario:
+    treatment_rooms = 2 # Let's say we have 2 treatment rooms
+scenario_details = SimpleScenario()
+
+# --- Now, the magic happens! ---
+# Call the "Easy Button" function
+my_animation = animate_activity_log(
+    event_log=my_event_log,          # What happened?
+    event_position_df=my_layout,     # Where should things be?
+    scenario=scenario_details,       # How many resources? (Optional)
+    time_display_units='dhm',        # Show time as days/hours/mins
+    icon_and_text_size=20,           # Make icons a bit smaller
+    every_x_time_units=1             # Take a snapshot every 1 time unit
+)
+
+# You can now display the animation (e.g., in a Jupyter Notebook)
+# my_animation.show() # This would pop up the interactive animation
+```
+
+**What happens when you run this?**
+
+You don't get numbers or text back directly. Instead, `my_animation` holds an interactive Plotly animation object. If you were running this in a tool like a Jupyter Notebook and called `my_animation.show()`, you'd see an animation appear, showing little icons (representing patients) moving from the 'Arrival' location, possibly waiting at 'Waiting', moving to 'Treatment', and finally leaving via 'Exit', all synchronized with the times in `my_event_log`.
+
+## What's Happening Under the Hood?
+
+`animate_activity_log` acts like our movie director, but it relies on a crew of helper functions to do the actual work. Here's a simplified view of the steps it takes internally when you call it:
+
+1.  **Snapshot Prep (Act 1):** The raw `event_log` tells us *when* things change, but an animation needs to know where everyone is at regular intervals (like every minute, or every 10 minutes). `animate_activity_log` first calls helper functions ([`reshape_for_animations`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)) to process the event log and figure out the status (location or activity) of every patient at each "snapshot" time.
+2.  **Position Calculation (Act 2):** Knowing a patient is "Waiting" isn't enough for the animation; we need exact (x, y) screen coordinates. `animate_activity_log` uses another helper ([`generate_animation_df`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)) along with your `event_position_df` (the layout) to calculate the precise (x, y) position for every patient in every snapshot, handling things like arranging patients neatly in queues or assigning them to specific resource slots (like Treatment Room 1 vs. Treatment Room 2).
+3.  **Animation Generation (The Final Cut):** With the fully prepared data frame containing patient IDs, icons, and precise (x, y) coordinates for every time snapshot, `animate_activity_log` calls the final specialist function ([`generate_animation`](06_animation_generation_generate_animation_.qmd)). This function takes all that prepared data and uses the Plotly library to build the actual interactive animation figure, complete with a timeline slider, play/pause buttons, and tooltips.
+
+Here's a diagram showing that flow:
+
+```{mermaid}
+sequenceDiagram
+    participant U as User
+    participant AAL as animate_activity_log (The Director)
+    participant RFA as reshape_for_animations (Snapshot Prep)
+    participant GAD as generate_animation_df (Position Calc)
+    participant GA as generate_animation (Animation Builder)
+    participant PFig as Plotly Figure (The Movie)
+
+    U->>AAL: Call with event_log, layout, options
+    AAL->>RFA: Process event_log for snapshots
+    RFA-->>AAL: Return snapshot data
+    AAL->>GAD: Calculate (x, y) positions using snapshot data & layout
+    GAD-->>AAL: Return data with positions
+    AAL->>GA: Generate animation using positioned data & options
+    GA-->>AAL: Return Plotly animation object
+    AAL-->>U: Return Plotly Figure
+```
+
+Essentially, `animate_activity_log` orchestrates calls to these more specialized functions, which you can explore in later chapters:
+
+*   [Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
+*   [Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)
+
+You *can* call these functions individually if you need very fine-grained control, but for most uses, the `animate_activity_log` facade is the way to go!
+
+## Key Customization Options
+
+While we used basic options above, `animate_activity_log` has many parameters to customize your animation:
+
+*   `every_x_time_units`: How often to take a snapshot (smaller numbers = smoother but potentially slower animation).
+*   `icon_and_text_size`: Controls the size of the patient icons and any labels.
+*   `add_background_image`: You can overlay the animation on a floor plan or diagram!
+*   `time_display_units`: Show time as simple numbers, or format it like 'Days:Hours:Minutes'.
+*   `frame_duration` / `frame_transition_duration`: Control the speed of the animation playback.
+*   `wrap_queues_at`: How many patients to show in a line before starting a new row in a queue.
+
+...and many more! Check the function's documentation for all the possibilities.
+
+## Conclusion
+
+You've now met `animate_activity_log`, the main entry point and "easy button" for creating process animations with `vidigi`. It acts as a facade, hiding the complexity of data preparation and animation generation by coordinating specialized helper functions. You provide the raw event data and layout information, and it delivers the final animated visualization.
+
+But how do we get that crucial `event_log` data in the first place? That's exactly what we'll cover in the next chapter!
+
+Next up: [Chapter 2: Event Log](02_event_log_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)
