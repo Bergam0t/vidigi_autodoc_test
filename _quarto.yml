@@ -4,24 +4,19 @@ project:
 
 website:
   title: "Vidigi - Auto Documentation"
-  navbar:
-    left:
-      - text: "Home"
-        file: index.qmd
-      - text: "Modules"
-        menu:
-          - text: "Animation Facade (animate_activity_log)"
-            file: 01_animation_facade_animate_activity_log_.qmd
-          - text: "Event Log"
-            file: 02_event_log_.qmd
-          - text: "Layout Configuration (event_position_df)"
-            file: 03_layout_configuration_event_position_df_.qmd
-          - text: "SimPy Resource Enhancement (CustomResource, Store, populate_store)"
-            file: 04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
-          - text: "Snapshot Preparation (reshape_for_animations / generate_animation_df)"
-            file: 05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
-          - text: "Animation Generation (generate_animation)"
-            file: 06_animation_generation_generate_animation_.qmd
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - index.qmd
+      - section: "Modules"
+        contents:
+          - 01_animation_facade_animate_activity_log_.qmd
+          - 02_event_log_.qmd
+          - 03_layout_configuration_event_position_df_.qmd
+          - 04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
+          - 05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
+          - 06_animation_generation_generate_animation_.qmd
 
 format:
   html:
