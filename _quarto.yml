@@ -8,15 +8,33 @@ website:
     style: "docked"
     search: true
     contents:
+    - section: "Version 1 - Beginner-Friendly"
+      contents:
       - index.qmd
-      - section: "Modules"
-        contents:
-          - 01_animation_facade_animate_activity_log_.qmd
-          - 02_event_log_.qmd
-          - 03_layout_configuration_event_position_df_.qmd
-          - 04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
-          - 05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
-          - 06_animation_generation_generate_animation_.qmd
+      - 01_animation_facade_animate_activity_log_.qmd
+      - 02_event_log_.qmd
+      - 03_layout_configuration_event_position_df_.qmd
+      - 04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
+      - 05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
+      - 06_animation_generation_generate_animation_.qmd
+    - section: "Version 2 - Intermediate Programmer"
+      contents:
+      - autodoc_v2/index.qmd
+      - autodoc_v2/01_animation_facade_animate_activity_log_.qmd
+      - autodoc_v2/02_event_log_.qmd
+      - autodoc_v2/03_layout_configuration_event_position_df_.qmd
+      - autodoc_v2/04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
+      - autodoc_v2/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
+      - autodoc_v2/06_animation_generation_generate_animation_.qmd
+    - section: "Beginner Friendly + 1980s References"
+      contents:
+      - autodoc_v3/index.qmd
+      - autodoc_v3/01_animation_facade_animate_activity_log_.qmd
+      - autodoc_v3/02_event_log_.qmd
+      - autodoc_v3/03_layout_configuration_event_position_df_.qmd
+      - autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.qmd
+      - autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd
+      - autodoc_v3/06_animation_generation_generate_animation_.qmd
 
 format:
   html:

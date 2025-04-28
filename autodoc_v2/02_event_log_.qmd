@@ -1,0 +1,206 @@
+# Chapter 2: Event Log
+
+In [Chapter 1: Animation Facade (`animate_activity_log`)](01_animation_facade_animate_activity_log_.qmd), we introduced the main `animate_activity_log` function as the "easy button" for creating `vidigi` animations. We saw that it takes your simulation data and layout information to produce the final visualisation. Now, let's delve into the most crucial piece of input data: the `event_log`.
+
+## Motivation: Recording the Journey
+
+Imagine you've simulated our simple clinic again. Patients arrive, perhaps wait for a nurse, get treated, and then leave. To create an animation, `vidigi` needs to know precisely *when* each of these significant moments occurred for *every single patient*. It needs a detailed, step-by-step account, much like a diary or a ship's log, tracking each entity's journey through the system.
+
+Without this structured record, `vidigi` wouldn't know when Patient 5 started waiting, when they began treatment with Nurse 2, or when they finally departed. The `event_log` provides this essential sequential information.
+
+## The Core Concept: An Event Log DataFrame
+
+At its heart, the `event_log` is a pandas DataFrame. Each row in this DataFrame represents a single, significant event occurring for a specific entity (which we often call 'patient' by convention, but it could be anything – a customer, a document, a widget) at a particular point in simulation time.
+
+Think of it as a table with columns answering:
+*   **Who?** (`patient` column)
+*   **What happened?** (`event` column)
+*   **What kind of thing happened?** (`event_type` column)
+*   **When did it happen?** (`time` column)
+*   (Sometimes) **Which specific resource was involved?** (`resource_id` column)
+
+### Required Columns
+
+For `vidigi` to work correctly, your `event_log` DataFrame *must* contain the following columns:
+
+1.  **`patient`**: An identifier for the entity moving through the system. This should be unique for each entity within a single simulation run. It can be an integer, string, or any unique label.
+2.  **`event_type`**: A specific category defining the *type* of event. This tells `vidigi` how to interpret the event for positioning and animation. The valid `event_type` strings are:
+    *   `'arrival_departure'`: Marks the entity entering or leaving the simulation scope.
+    *   `'queue'`: Indicates the entity has started waiting for something (e.g., a resource, a process step).
+    *   `'resource_use'`: Signifies the entity has begun actively using a specific instance of a resource (like a nurse, a machine, a room).
+    *   `'resource_use_end'`: Marks the moment the entity finishes using that specific resource instance.
+3.  **`event`**: A string describing the specific event that occurred. While you can often choose custom names here (like `'wait_for_nurse'`, `'start_treatment'`), there are two *mandatory* event names required within the `'arrival_departure'` event type:
+    *   `'arrival'`: Must be used for the very first event when an entity enters the system being visualised.
+    *   `'depart'`: Must be used for the very last event when an entity leaves the system being visualised.
+    Using these specific names is crucial for `vidigi` to know the entity's lifespan within the animation.
+4.  **`time`**: A numerical value representing the simulation time at which the event occurred. This must be consistently measured in the same units throughout your log (e.g., minutes, hours, days).
+
+### Conditional Column: `resource_id`
+
+There's one more column that's essential *if* you're logging resource usage:
+
+5.  **`resource_id`**: This identifier links an entity to a *specific instance* of a resource. It's required for rows where `event_type` is `'resource_use'` or `'resource_use_end'`. For example, if you have 3 nurses, the `resource_id` might be 1, 2, or 3, indicating which specific nurse the patient is interacting with. This allows `vidigi` to show the patient consistently occupying Nurse 2's 'slot' in the animation, rather than just appearing generically in the 'treatment' area. This column should be `None` or `NaN` for event types like `'arrival_departure'` or `'queue'`.
+
+### Optional Columns
+
+You can include other columns in your `event_log` for your own analysis or potentially for future `vidigi` features. A common one used in examples is:
+
+*   **`pathway`**: A string indicating a particular process path or category the entity belongs to (e.g., 'Routine', 'Urgent'). While `vidigi`'s core animation logic doesn't strictly depend on this column currently, it can be useful for filtering or analysis alongside the visualisation.
+
+## Generating the Event Log in Your Simulation
+
+`vidigi` primarily *consumes* the `event_log`; it expects you to generate it from your simulation model. Typically, you'll add logging statements within your simulation code at the points where these key events occur.
+
+If you're using `simpy`, a common pattern is to maintain a list within your simulation model class. Whenever a significant event happens to an entity, you append a dictionary containing the event details to this list. After the simulation run completes, you convert this list of dictionaries into the required pandas DataFrame.
+
+Let's look at how you might log the different event types within a `simpy` model (drawing inspiration from the HSMA structure shown in `vidigi_docs/adding_vidigi_to_a_simple_simpy_model_hsma_structure.qmd`). Assume `self.event_log` is an initially empty list in your model class, `patient` is the entity object with an `identifier` attribute, and `self.env.now` gives the current simulation time.
+
+**1. Logging Arrival:**
+(Must use `event_type='arrival_departure'` and `event='arrival'`)
+
+```python
+# Inside your simpy process function, when a patient enters
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine', # Optional pathway info
+    'event_type': 'arrival_departure',
+    'event': 'arrival',
+    'time': self.env.now,
+    'resource_id': None # No specific resource involved
+})
+```
+
+**2. Logging Start of Queueing:**
+(Uses `event_type='queue'`; `event` name is user-defined)
+
+```python
+# Just before requesting a resource the patient needs to wait for
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'queue',
+    'event': 'wait_nurse', # Custom event name
+    'time': self.env.now,
+    'resource_id': None # No specific resource involved yet
+})
+# Now, the patient starts waiting (e.g., yield self.nurse_resource.get())
+```
+
+**3. Logging Start of Resource Use:**
+(Uses `event_type='resource_use'`; `event` name is user-defined; requires `resource_id`)
+
+```python
+# After successfully acquiring a specific resource instance (e.g., a nurse)
+# Assume 'nurse' is a CustomResource object obtained from a Store,
+# which has an 'id_attribute'. See Chapter 4 for details.
+nurse = yield self.nurses_store.get() # Acquire a specific nurse
+
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'resource_use',
+    'event': 'use_nurse', # Custom event name
+    'time': self.env.now,
+    'resource_id': nurse.id_attribute # Crucial: Log which nurse
+})
+# Now, the patient uses the nurse (e.g., yield self.env.timeout(treatment_time))
+```
+
+**4. Logging End of Resource Use:**
+(Uses `event_type='resource_use_end'`; `event` name is user-defined; requires `resource_id`)
+
+```python
+# Just before releasing the resource
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'resource_use_end',
+    'event': 'finish_nurse', # Custom event name
+    'time': self.env.now,
+    'resource_id': nurse.id_attribute # Crucial: Log which nurse was finished with
+})
+# Now, release the nurse
+self.nurses_store.put(nurse)
+```
+
+**5. Logging Departure:**
+(Must use `event_type='arrival_departure'` and `event='depart'`)
+
+```python
+# When the patient leaves the system
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'arrival_departure',
+    'event': 'depart',
+    'time': self.env.now,
+    'resource_id': None # No specific resource involved
+})
+```
+
+After the simulation finishes, you'd convert the list:
+
+```python
+import pandas as pd
+
+# Assuming self.event_log is the list populated during the simulation run
+event_log_df = pd.DataFrame(self.event_log)
+
+# Now event_log_df is ready to be passed to vidigi.animate_activity_log
+```
+
+For users of the `ciw` simulation library, `vidigi` provides a helper function `vidigi.utils.event_log_from_ciw_recs` that can convert `ciw`'s standard record output into the required `event_log` DataFrame format, saving you from adding manual logging.
+
+## Example Event Log DataFrame
+
+Here’s how a small section of a finished `event_log` DataFrame might look:
+
+```python
+import pandas as pd
+import numpy as np # Often needed for NaN/None
+
+# Example Data
+data = [
+    {'patient': 1, 'pathway': 'Routine', 'event_type': 'arrival_departure', 'event': 'arrival', 'time': 0, 'resource_id': np.nan},
+    {'patient': 2, 'pathway': 'Urgent', 'event_type': 'arrival_departure', 'event': 'arrival', 'time': 5, 'resource_id': np.nan},
+    {'patient': 1, 'pathway': 'Routine', 'event_type': 'queue', 'event': 'wait_nurse', 'time': 10, 'resource_id': np.nan},
+    {'patient': 2, 'pathway': 'Urgent', 'event_type': 'queue', 'event': 'wait_nurse', 'time': 12, 'resource_id': np.nan},
+    {'patient': 1, 'pathway': 'Routine', 'event_type': 'resource_use', 'event': 'use_nurse', 'time': 15, 'resource_id': 1},
+    {'patient': 2, 'pathway': 'Urgent', 'event_type': 'resource_use', 'event': 'use_nurse', 'time': 20, 'resource_id': 2},
+    {'patient': 1, 'pathway': 'Routine', 'event_type': 'resource_use_end', 'event': 'finish_nurse', 'time': 35, 'resource_id': 1},
+    {'patient': 1, 'pathway': 'Routine', 'event_type': 'arrival_departure', 'event': 'depart', 'time': 35, 'resource_id': np.nan},
+    {'patient': 2, 'pathway': 'Urgent', 'event_type': 'resource_use_end', 'event': 'finish_nurse', 'time': 40, 'resource_id': 2},
+    {'patient': 2, 'pathway': 'Urgent', 'event_type': 'arrival_departure', 'event': 'depart', 'time': 40, 'resource_id': np.nan}
+]
+event_log_df = pd.DataFrame(data)
+
+print(event_log_df)
+```
+
+Output:
+```
+   patient  pathway         event_type         event  time  resource_id
+0        1  Routine  arrival_departure       arrival     0          NaN
+1        2   Urgent  arrival_departure       arrival     5          NaN
+2        1  Routine              queue    wait_nurse    10          NaN
+3        2   Urgent              queue    wait_nurse    12          NaN
+4        1  Routine       resource_use     use_nurse    15          1.0
+5        2   Urgent       resource_use     use_nurse    20          2.0
+6        1  Routine   resource_use_end  finish_nurse    35          1.0
+7        1  Routine  arrival_departure        depart    35          NaN
+8        2   Urgent   resource_use_end  finish_nurse    40          2.0
+9        2   Urgent  arrival_departure        depart    40          NaN
+```
+This table provides the raw data `vidigi` needs. The internal functions, primarily [Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd), will process this log to determine the state (location and activity) of each patient at every time step required for the animation frames.
+
+## Conclusion
+
+The `event_log` DataFrame is the fundamental input that fuels `vidigi` animations. It's a structured record detailing the "who, what, when, and where" of each entity's journey through your simulated system. By ensuring your simulation produces a log with the correct columns (`patient`, `event_type`, `event`, `time`, and `resource_id` where applicable) and adheres to the specific requirements for `arrival` and `depart` events, you provide `vidigi` with the necessary information to visualise the dynamics.
+
+Now that we understand how to record *what* happens and *when*, we need to tell `vidigi` *where* these events should be displayed on the animation canvas. That's the role of the layout configuration.
+
+Next: [Chapter 3: Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

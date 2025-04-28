@@ -28,7 +28,7 @@ flowchart TD
 ## Chapters
 
 1. [Animation Facade (`animate_activity_log`)
-](01_animation_facade_animate_activity_log_.qmd).qmd
+](01_animation_facade_animate_activity_log_.qmd)
 2. [Event Log
 ](02_event_log_.qmd)
 3. [Layout Configuration (`event_position_df`)

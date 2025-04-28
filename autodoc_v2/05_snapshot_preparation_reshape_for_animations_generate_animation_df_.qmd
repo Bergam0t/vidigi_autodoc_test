@@ -1,0 +1,261 @@
+# Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)
+
+In [Chapter 4: Simpy Resource Enhancement](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd), we saw how to modify a `simpy` model using `CustomResource` and `simpy.Store` to log the specific `resource_id` used by each entity. This detailed tracking is crucial for accurate visualisation. Now, we move on to the next stage: transforming the raw simulation output (the [Event Log](02_event_log_.qmd)) into a format suitable for creating the animation frames.
+
+## Motivation: From Diary to Film Reel
+
+Think back to the [Event Log](02_event_log_.qmd). It's like a detailed diary, recording every significant event (arrival, start queue, start treatment, departure) for each entity precisely when it happened. This is great for analysis, but for an animation, we need something different. An animation is like a film reel – a sequence of static images (frames or snapshots) shown in quick succession. Each frame needs to show the position of *every* entity visible at that *specific moment* in time.
+
+Our raw `event_log` tells us *when Patient 5 started treatment*, but it doesn't directly tell us *where Patient 5 was at exactly 10:30 AM*, or *who else* was in the clinic at that time and where they were. We need a process to convert the event-driven diary into a time-sliced film reel.
+
+This conversion is the core task of the snapshot preparation stage, handled primarily by two functions: `reshape_for_animations` and `generate_animation_df`.
+
+## Key Concepts: Slicing Time and Placing Pieces
+
+The transformation happens in two main steps, orchestrated behind the scenes by the main [Animation Facade (`animate_activity_log`)](01_animation_facade_animate_activity_log_.qmd):
+
+1.  **`reshape_for_animations` (Time Slicing):** This function takes the raw `event_log` and slices simulation time into regular intervals (e.g., every 1 minute, every 10 minutes, controlled by the `every_x_time_units` parameter). For each time slice, it determines the state (i.e., the last recorded `event`, like 'wait_nurse' or 'use_nurse') of every entity currently active in the system. It effectively answers the question: "At time T, who was doing what?" It also calculates the rank of entities within the same state (e.g., position in a queue).
+
+2.  **`generate_animation_df` (Position Calculation):** This function takes the output from `reshape_for_animations` (which tells us *who* is doing *what* at each time slice) and combines it with the layout information from the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd). Its job is to calculate the exact `x_final` and `y_final` coordinates for every entity in every time slice. It handles the logic for arranging entities in queues (potentially wrapping them) and placing entities using specific resources based on their `resource_id`. It answers: "Given who is doing what at time T, and the layout map, *where exactly* should each entity be placed on the screen?"
+
+The overall flow looks like this:
+
+```{mermaid}
+graph LR
+    A[Raw `event_log` DataFrame <br>(From Chapter 2)] --> B(reshape_for_animations);
+    B -- every_x_time_units --> C[Snapshot DataFrame <br>(`full_patient_df`) <br> Columns: patient, minute, event, event_type, rank, resource_id...];
+    C --> D(generate_animation_df);
+    E[Layout `event_position_df` DataFrame <br>(From Chapter 3)] --> D;
+    F[Layout Params <br>(wrap_queues_at, gaps...)] --> D;
+    D --> G[Positioned Snapshot DataFrame <br>(`full_patient_df_plus_pos`) <br> Columns: patient, minute, event, icon, x_final, y_final...];
+    G --> H[Animation Generation <br>(generate_animation) <br>(Chapter 6)];
+```
+
+Let's delve into how each function works.
+
+## Time Slicing with `reshape_for_animations`
+
+The primary goal of `reshape_for_animations` is to convert the sparse, event-driven log into a dense, time-step-based representation.
+
+**Purpose:** To determine the state (most recent event) and rank (e.g., queue position) of every active entity at regular time intervals.
+
+**Inputs:**
+*   `event_log`: The raw DataFrame as described in [Chapter 2: Event Log](02_event_log_.qmd).
+*   `every_x_time_units`: The gap between consecutive time snapshots (e.g., `1` for every minute, `10` for every 10 minutes).
+*   `limit_duration`: The maximum simulation time to process.
+*   `step_snapshot_max`: Limits how many entities are processed per event type in a single snapshot (for performance with very large queues).
+
+**Process (Conceptual):**
+
+1.  **Pivot (Optional but helpful):** The code often starts by pivoting the `event_log` slightly to easily access arrival and departure times per patient.
+2.  **Iterate Through Time:** Loop through simulation time from 0 up to `limit_duration`, taking steps of size `every_x_time_units`. Let the current time step be `minute`.
+3.  **Identify Active Entities:** For the current `minute`, find all `patient` identifiers that have `arrival` time <= `minute` AND (`depart` time >= `minute` OR `depart` time is missing/null). These are the entities currently "in the system".
+4.  **Find Latest State:** Filter the original `event_log` to include only events for these active entities that occurred at or before the current `minute`. For each active entity, find their *very last* event in this filtered set (using `groupby('patient').tail(1)` after sorting by time). This last event represents the entity's state (e.g., 'wait_nurse', 'use_nurse') at this specific `minute`.
+5.  **Rank Entities:** Within each `event` category at the current `minute`, rank the entities based on when they entered that state (often approximated by the original event log's index or time). This gives us the `rank` column, crucial for queue ordering.
+6.  **Limit Snapshot Size:** Apply the `step_snapshot_max` limit if needed.
+7.  **Store Snapshot:** Store the details (patient, event, event_type, resource_id, rank, original event time, current snapshot `minute`) for this time step.
+8.  **Concatenate:** After looping through all time steps, combine the stored snapshots into a single large DataFrame (`full_patient_df`).
+9.  **Add Exit State:** Append a final 'exit' event for each patient one time step after their last recorded event. This ensures entities visibly leave the animation area rather than just vanishing.
+
+**Output (`full_patient_df`):**
+A DataFrame where each row represents a specific entity (`patient`) in a specific state (`event`, `event_type`, potentially using `resource_id`) at a specific snapshot time (`minute`), along with their `rank` within that state at that time.
+
+**Code Glimpse:**
+
+Here's a simplified view of the core logic inside `vidigi.prep.reshape_for_animations`:
+
+```python
+# From: vidigi/prep.py (Simplified)
+
+def reshape_for_animations(event_log,
+                           every_x_time_units=10,
+                           limit_duration=14400, # e.g., 10 days in minutes
+                           step_snapshot_max=50,
+                           debug_mode=False):
+
+    patient_dfs = [] # To store snapshots for each minute
+
+    # 1. Pivot helps find arrival/departure easily (simplified view)
+    pivoted_log = event_log.pivot_table(values="time", index="patient",
+                                        columns="event",
+                                        aggfunc='first') # Simplified pivot
+
+    # 2. Iterate Through Time
+    for minute in range(0, limit_duration, every_x_time_units):
+
+        # 3. Identify Active Entities
+        active_patients_mask = (pivoted_log['arrival'] <= minute) & \
+                               ((pivoted_log['depart'] >= minute) | pd.isnull(pivoted_log['depart']))
+        current_patients_in_moment = pivoted_log[active_patients_mask].index
+
+        if not current_patients_in_moment.empty:
+            # 4. Find Latest State for active patients up to this minute
+            patient_minute_df = event_log[
+                (event_log['patient'].isin(current_patients_in_moment)) &
+                (event_log['time'] <= minute)
+            ].copy() # Filter original log
+
+            # Sort by time, then use groupby().tail(1) to get the latest event per patient
+            patient_minute_df = patient_minute_df.sort_values(['time', 'index']) # Assuming 'index' preserves original order
+            most_recent_events = patient_minute_df.groupby('patient').tail(1)
+
+            # 5. Rank Entities within each event group
+            most_recent_events['rank'] = most_recent_events.groupby('event')['time'] \
+                                        .rank(method='first', ascending=True)
+
+            # 6. Limit Snapshot Size (simplified)
+            most_recent_events = most_recent_events.groupby('event').head(step_snapshot_max)
+
+            # 7. Store Snapshot (adding the current minute)
+            patient_dfs.append(most_recent_events.assign(minute=minute))
+
+    # 8. Concatenate all snapshots
+    full_patient_df = pd.concat(patient_dfs, ignore_index=True) if patient_dfs else pd.DataFrame()
+
+    # 9. Add Exit State (simplified logic)
+    if not full_patient_df.empty:
+        final_step = full_patient_df.loc[full_patient_df.groupby('patient')['minute'].idxmax()]
+        final_step = final_step.copy()
+        final_step['minute'] = final_step['minute'] + every_x_time_units
+        final_step['event'] = "exit"
+        final_step['event_type'] = "arrival_departure" # Consistent type needed
+        full_patient_df = pd.concat([full_patient_df, final_step], ignore_index=True)
+
+    return full_patient_df.sort_values(["minute", "event"]).reset_index(drop=True)
+
+```
+This function takes the raw event stream and effectively samples the state of the system at regular intervals, preparing the ground for spatial layout.
+
+## Calculating Positions with `generate_animation_df`
+
+Now that we know *who* is doing *what* at each time slice (`minute`), `generate_animation_df` figures out *exactly where* they should be drawn.
+
+**Purpose:** To calculate the final X and Y coordinates (`x_final`, `y_final`) for each entity in each snapshot, based on their state, rank/resource ID, and the defined layout.
+
+**Inputs:**
+*   `full_patient_df`: The DataFrame output by `reshape_for_animations`.
+*   `event_position_df`: The layout DataFrame from [Chapter 3: Layout Configuration](03_layout_configuration_event_position_df_.qmd).
+*   Layout parameters: `wrap_queues_at`, `wrap_resources_at`, `gap_between_entities`, `gap_between_resources`, `gap_between_rows`.
+*   `custom_entity_icon_list`: Optional list of emojis/icons to use for entities.
+
+**Process (Conceptual):**
+
+1.  **Merge Layout:** Join `full_patient_df` with `event_position_df` on the `event` column. This brings the base `x` and `y` coordinates for each entity's current state into the main DataFrame.
+2.  **Split by Event Type:** Conceptually (or literally in the code), separate the rows based on `event_type` because positioning logic differs:
+    *   **Queues (`event_type == 'queue'`):**
+        *   Start with the base `x`, `y` from the layout.
+        *   Calculate `x_final`: Typically subtract `rank * gap_between_entities` from the base `x` (queues usually extend leftwards).
+        *   Calculate `y_final`: Initially the base `y`.
+        *   Handle Wrapping: If `wrap_queues_at` is set, use the `rank` and `wrap_queues_at` to determine the row number (`row = floor((rank - 1) / wrap_queues_at)`). Adjust `x_final` (resetting based on position within the row) and `y_final` (adding `row * gap_between_rows`).
+    *   **Resource Use (`event_type == 'resource_use'`):**
+        *   Start with the base `x`, `y`.
+        *   Requires the `resource_id` column populated as per [Chapter 4](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd).
+        *   Calculate `x_final`: Typically subtract `resource_id * gap_between_resources` from the base `x`.
+        *   Calculate `y_final`: Initially the base `y`.
+        *   Handle Wrapping: Similar to queues, but using `resource_id` and `wrap_resources_at`. Adjust `x_final` and `y_final` based on the resource row.
+    *   **Other Events (e.g., `arrival`, `exit`, custom non-queue/resource steps):**
+        *   Usually, `x_final` and `y_final` are simply set to the base `x` and `y` from the layout.
+3.  **Combine Back:** Concatenate the processed subsets back into a single DataFrame.
+4.  **Assign Icons:** Generate a mapping from unique `patient` identifiers to icons (e.g., emojis from the default list or `custom_entity_icon_list`). Add an `icon` column to the DataFrame.
+5.  **Handle Snapshot Limit Visuals:** If `step_snapshot_max` was applied in `reshape_for_animations`, this function might modify the icon/text for the last displayed entity in a truncated queue/resource group to indicate that more entities exist but aren't shown (e.g., displaying "+ 5 more").
+
+**Output (`full_patient_df_plus_pos`):**
+The final DataFrame ready for plotting. Contains `patient`, `minute`, `event`, `icon`, and the crucial `x_final`, `y_final` coordinates, along with other potentially useful columns.
+
+**Code Glimpse:**
+
+Here's a simplified look at the positioning logic within `vidigi.prep.generate_animation_df`:
+
+```python
+# From: vidigi/prep.py (Simplified)
+import numpy as np
+import pandas as pd
+
+def generate_animation_df(
+        full_patient_df,
+        event_position_df,
+        wrap_queues_at=20,
+        wrap_resources_at=20,
+        gap_between_entities=10,
+        gap_between_resources=10,
+        gap_between_rows=30,
+        # ... other params ...
+        custom_entity_icon_list=None
+):
+
+    # 1. Merge Layout info (base x, y)
+    # Assumes 'rank' column already exists from reshape_for_animations
+    df_plus_pos = full_patient_df.merge(event_position_df[['event', 'x', 'y']],
+                                        on="event", how='left')
+
+    # --- 2. Split and Calculate Positions ---
+    # Handle Queues
+    queues = df_plus_pos[df_plus_pos['event_type'] == 'queue'].copy()
+    if not queues.empty:
+        queues['x_final'] = queues['x'] - queues['rank'] * gap_between_entities
+        queues['y_final'] = queues['y']
+        if wrap_queues_at is not None:
+            queues['row'] = np.floor((queues['rank'] - 1) / wrap_queues_at)
+            # Adjust x based on position in the row
+            queues['x_final'] += (wrap_queues_at * queues['row'] * gap_between_entities) + gap_between_entities
+            # Adjust y based on the row
+            queues['y_final'] += queues['row'] * gap_between_rows
+
+    # Handle Resource Use
+    resources = df_plus_pos[df_plus_pos['event_type'] == 'resource_use'].copy()
+    if not resources.empty:
+        # Assumes 'resource_id' column exists and is numeric (1-based)
+        resources['x_final'] = resources['x'] - resources['resource_id'] * gap_between_resources
+        resources['y_final'] = resources['y']
+        if wrap_resources_at is not None:
+            resources['row'] = np.floor((resources['resource_id'] - 1) / wrap_resources_at)
+            # Adjust x based on position in the row
+            resources['x_final'] += (wrap_resources_at * resources['row'] * gap_between_resources) + gap_between_resources
+            # Adjust y based on the row
+            resources['y_final'] += resources['row'] * gap_between_rows
+
+    # Handle Other events (simplified - assume they just use base x, y)
+    others = df_plus_pos[~df_plus_pos['event_type'].isin(['queue', 'resource_use'])].copy()
+    if not others.empty:
+        others['x_final'] = others['x']
+        others['y_final'] = others['y']
+
+    # 3. Combine Back
+    final_df_parts = [part for part in [queues, resources, others] if not part.empty]
+    final_df = pd.concat(final_df_parts, ignore_index=True) if final_df_parts else pd.DataFrame()
+
+    # 4. Assign Icons (simplified)
+    if not final_df.empty:
+        unique_patients = final_df['patient'].unique()
+        # Default icon list or custom list
+        icon_list = custom_entity_icon_list or get_default_icon_list()
+        icon_map = {patient: icon_list[i % len(icon_list)] for i, patient in enumerate(unique_patients)}
+        final_df['icon'] = final_df['patient'].map(icon_map)
+
+        # 5. Handle Snapshot Limit Visuals (logic omitted for brevity)
+        # ... code to potentially modify 'icon' for truncated groups ...
+
+    return final_df.sort_values(['minute', 'patient']) # Return sorted
+
+# Helper function (conceptual)
+def get_default_icon_list():
+    return ['🧔🏼', '👨🏿‍🦯', '👨🏻‍🦰', '🧑🏻', '👩🏿‍🦱', '🤰', '👳🏽', '👩🏼‍🦳', '👨🏿‍🦳', '👩🏼‍🦱', ...] # A long list of emojis
+```
+
+This function takes the time-sliced data and applies the spatial rules defined by the layout, producing the exact coordinates needed frame-by-frame.
+
+## Conclusion
+
+The snapshot preparation stage, comprising `reshape_for_animations` and `generate_animation_df`, is the crucial data transformation engine within `vidigi`. It bridges the gap between the raw, event-based simulation output (`event_log`) and the frame-by-frame requirements of an animation.
+
+`reshape_for_animations` processes the event log to determine *who* is doing *what* at regular time intervals, creating time slices. `generate_animation_df` then takes these time slices and the layout configuration (`event_position_df`) to calculate the precise X/Y coordinates for each entity in each slice, handling queue formation and resource allocation visually.
+
+The result is a comprehensive DataFrame (`full_patient_df_plus_pos`) containing everything needed to draw each frame: the entity identifier, the time snapshot, the assigned icon, and the final `x_final`, `y_final` position.
+
+With this meticulously prepared data, we are finally ready to generate the animation itself using Plotly.
+
+Next: [Chapter 6: Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

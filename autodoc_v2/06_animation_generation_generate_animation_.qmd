@@ -1,0 +1,279 @@
+# Chapter 6: Animation Generation (`generate_animation`)
+
+In [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd), we saw how `vidigi` transforms the raw `event_log` into a detailed, frame-by-frame blueprint, the `full_patient_df_plus_pos` DataFrame. This blueprint tells us precisely where each entity (with its assigned icon) should be at every time snapshot (`minute`). Now, we need to turn this meticulously prepared data into an actual moving picture.
+
+This final step is handled by the `generate_animation` function. Think of the previous steps as preparing the film reel, frame by frame. `generate_animation` is the projector that takes this reel and displays the movie.
+
+## Motivation: Bringing the Data to Life
+
+We have the data: entity IDs, time steps, icons, and exact X/Y coordinates. But this data is static, just a large table. The goal is to create a dynamic, visual representation where we can actually *see* the entities (our emojis) moving through the stages defined in our layout, forming queues, using resources, and progressing through the system over time.
+
+`generate_animation` leverages the power of the Plotly Express library, specifically its animated scatter plot capabilities, to achieve this. It takes the prepared snapshot data and maps it onto a visual canvas, adding interactive controls and static background elements to create the final animation figure.
+
+## The Core Task: Rendering the Animated Scatter Plot
+
+The primary job of `generate_animation` is to take the `full_patient_df_plus_pos` DataFrame and use it to generate a Plotly `Figure` object containing an animated scatter plot.
+
+Here's what it needs to do:
+1.  **Plot Entities:** For each time snapshot (`minute`), plot each active entity's assigned `icon` at its calculated `x_final`, `y_final` coordinates.
+2.  **Animate Movement:** Instruct Plotly to treat points with the same `patient` ID across different time snapshots as the same object, allowing Plotly to automatically generate smooth transitions (tweening) between their positions from one frame to the next.
+3.  **Add Context:** Overlay static elements like stage labels (e.g., "Waiting Area"), resource placeholders (e.g., markers for available nurse bays), and potentially a background image.
+4.  **Configure Display:** Set up the plot's appearance, including axes, size, time display format on the slider, animation speed, and interactive controls.
+
+## Usage (How it's Called)
+
+While `generate_animation` is the engine doing the plotting work, you'll typically interact with it indirectly via the main [Animation Facade (`animate_activity_log`)](01_animation_facade_animate_activity_log_.qmd). The facade function prepares the data using the functions from Chapter 5 and then passes the result (`full_patient_df_plus_pos`) along with layout information and customisation parameters to `generate_animation`.
+
+However, understanding the key parameters `generate_animation` accepts is useful, especially if you want to customise the final look or potentially use it directly after preparing the data yourself:
+
+```python
+# Conceptual call structure:
+fig = generate_animation(
+    full_patient_df_plus_pos=prepared_data_df, # Output from generate_animation_df
+    event_position_df=layout_df,              # Layout definition (Chapter 3)
+    scenario=scenario_object,                 # For resource counts (Chapter 3 & 4)
+    plotly_height=900,                        # Figure height in pixels
+    plotly_width=None,                        # Figure width (None for auto)
+    include_play_button=True,                 # Show the play/pause button
+    add_background_image='path/to/bg.png',    # Optional background image
+    display_stage_labels=True,                # Show text labels for stages
+    icon_and_text_size=24,                    # Size of emoji icons
+    override_x_max=None,                      # Set fixed X-axis limit
+    override_y_max=None,                      # Set fixed Y-axis limit
+    time_display_units='dhm',                 # Format time on slider ('dhm', 'd', None)
+    resource_opacity=0.8,                     # Opacity of resource markers
+    custom_resource_icon='🏥',                # Use a custom icon for resources
+    wrap_resources_at=20,                     # Resource wrapping (match generate_animation_df)
+    gap_between_resources=10,                 # Resource spacing (match generate_animation_df)
+    gap_between_rows=30,                      # Row spacing (match generate_animation_df)
+    setup_mode=False,                         # Show axes/grid for layout setup?
+    frame_duration=400,                       # Milliseconds per frame
+    frame_transition_duration=600,            # Milliseconds for transition tweening
+    debug_mode=False
+)
+
+# fig is now a plotly.graph_objs._figure.Figure object
+# fig.show() or fig.write_html(...)
+```
+
+The most crucial inputs are the `full_patient_df_plus_pos` (the film reel) and the `event_position_df` (the map/layout). The other parameters control the aesthetics and behaviour of the animation.
+
+## Under the Bonnet: How it Works
+
+Let's break down the steps `generate_animation` takes internally to create the visualisation.
+
+**1. Plotly Express Core: The Animated Scatter Plot**
+
+The foundation of the animation is created using `plotly.express.scatter` (often imported as `px`). This powerful function can create animated plots directly from a DataFrame. The key lies in specifying the correct arguments:
+
+*   `data_frame=full_patient_df_plus_pos`: The input data containing entity, position, icon, and time.
+*   `x="x_final"`, `y="y_final"`: The columns containing the coordinates for each point in each frame.
+*   `animation_frame="minute_display"`: This column tells Plotly which rows belong to which frame of the animation. The function prepares a user-friendly `minute_display` column based on the `time_display_units` parameter.
+*   `animation_group="patient"`: This is vital. It tells Plotly that rows with the same `patient` value across different `animation_frame`s represent the same logical entity. Plotly uses this to smoothly interpolate the position (`x_final`, `y_final`) between frames, creating the illusion of movement.
+*   `text="icon"`: Instead of plotting a standard marker (like a dot), we tell Plotly to display the text from the `icon` column (which contains our emojis) at the `(x_final, y_final)` position.
+*   `opacity=0`: We make the underlying scatter marker itself invisible, as we only want to see the `text` (the emoji).
+*   `hover_name`, `hover_data`: Configure the information shown when hovering over an entity in the interactive plot.
+*   `range_x`, `range_y`: Set the boundaries of the plot axes.
+*   `height`, `width`: Set the dimensions of the figure.
+
+This single `px.scatter` call generates the base Plotly figure (`fig`) with the animated entities.
+
+```python
+# From: vidigi/animation.py (Simplified generate_animation function)
+import plotly.express as px
+# ... other imports ...
+
+def generate_animation(full_patient_df_plus_pos, event_position_df, scenario=None, #... other params ...
+                       ):
+    # ... code to calculate x_max, y_max, prepare 'minute_display' column ...
+
+    # Define hover info based on whether scenario (for resource_id) is present
+    if scenario is not None:
+        hovers = ["patient", "pathway", "time", "minute", "resource_id"]
+    else:
+        hovers = ["patient", "pathway", "time", "minute"]
+
+    # 1. Create the core animated scatter plot
+    fig = px.scatter(
+            full_patient_df_plus_pos.sort_values('minute'), # Ensure data is time-sorted
+            x="x_final",
+            y="y_final",
+            animation_frame="minute_display", # Drive animation by time snapshots
+            animation_group="patient",        # Link entities across frames
+            text="icon",                      # Display emoji icon as text
+            hover_name="event",               # Info on hover
+            hover_data=hovers,                # More info on hover
+            range_x=[0, x_max],               # Set plot boundaries
+            range_y=[0, y_max],
+            height=plotly_height,
+            width=plotly_width,
+            opacity=0                         # Make actual scatter marker invisible
+            )
+
+    # ... Code to add static layers and configure layout ...
+
+    return fig
+```
+This sets up the core animation – emojis moving around based on the prepared data.
+
+**2. Adding Static Layers**
+
+Once the base `fig` object exists, `generate_animation` adds static layers using Plotly's `graph_objects` module (often imported as `go`). These elements don't change from frame to frame.
+
+*   **Stage Labels:** If `display_stage_labels=True`, it iterates through the `event_position_df` and adds a `go.Scatter` trace with `mode="text"`. This trace plots the text from the `label` column of `event_position_df` near the corresponding base `x`, `y` coordinates.
+
+    ```python
+    # From: vidigi/animation.py (Simplified generate_animation function)
+    import plotly.graph_objects as go
+
+    # ... inside generate_animation, after px.scatter ...
+
+    if display_stage_labels:
+        fig.add_trace(go.Scatter(
+            # Offset slightly from the base coordinates for better visibility
+            x=[pos + 10 for pos in event_position_df['x'].to_list()],
+            y=event_position_df['y'].to_list(),
+            mode="text",                        # Display text, not markers
+            name="",                            # No legend entry
+            text=event_position_df['label'].to_list(), # Use labels from layout df
+            textposition="middle right",        # Position text relative to coordinates
+            hoverinfo='none'                    # No hover interaction for labels
+        ))
+    ```
+
+*   **Resource Placeholders:** If a `scenario` object is provided, it calculates the positions for each individual resource slot based on the `event_position_df` (finding rows with a non-null `resource` column), the resource count from `getattr(scenario, resource_name)`, and layout parameters (`gap_between_resources`, `wrap_resources_at`, `gap_between_rows`). It then adds a `go.Scatter` trace with `mode="markers"` (or `mode="markers+text"` if `custom_resource_icon` is used) to display these placeholders, often as light blue circles, slightly offset from where the entities using them will appear.
+
+    ```python
+    # From: vidigi/animation.py (Simplified generate_animation function)
+
+    # ... inside generate_animation ...
+
+    if scenario is not None:
+        # --- Calculate resource positions (Simplified - see Chapter 3 for details) ---
+        events_with_resources = event_position_df[event_position_df['resource'].notnull()].copy()
+        # Get counts from scenario object
+        events_with_resources['resource_count'] = events_with_resources['resource'].apply(
+            lambda resource_name: getattr(scenario, resource_name)
+        )
+        # Calculate individual resource slot positions including wrapping
+        # (Complex calculation involving gaps and wrapping omitted for brevity - stores results in resource_pos_df)
+        resource_pos_df = calculate_resource_slot_positions(
+            events_with_resources,
+            gap_between_resources,
+            gap_between_rows,
+            wrap_resources_at
+        )
+        # --- End Calculation ---
+
+        # Add the trace for resource placeholders
+        if custom_resource_icon is not None:
+             fig.add_trace(go.Scatter(
+                 x=resource_pos_df['x_final'],
+                 y=[y - 10 for y in resource_pos_df['y_final']], # Offset slightly
+                 mode="markers+text",
+                 text=custom_resource_icon,          # Use custom icon text
+                 marker=dict(opacity=0),             # Hide underlying marker
+                 opacity=resource_opacity,           # Icon opacity
+                 hoverinfo='none'
+             ))
+        else:
+             fig.add_trace(go.Scatter(
+                 x=resource_pos_df['x_final'],
+                 y=[y - 10 for y in resource_pos_df['y_final']], # Offset slightly
+                 mode="markers",
+                 marker=dict(color='LightSkyBlue', size=15), # Default marker
+                 opacity=resource_opacity,
+                 hoverinfo='none'
+             ))
+    ```
+    *(Note: `calculate_resource_slot_positions` is a conceptual representation of the logic embedded within `generate_animation` that determines the `x_final`, `y_final` for each resource slot based on its ID, the base position, gaps, and wrapping rules.)*
+
+*   **Background Image:** If `add_background_image` path is provided, it uses `fig.add_layout_image` to embed the image into the plot background, stretched to fit the axes.
+
+    ```python
+    # From: vidigi/animation.py (Simplified generate_animation function)
+
+    if add_background_image is not None:
+        fig.add_layout_image(
+            dict(
+                source=add_background_image, # Path or URL to the image
+                xref="x domain",             # Coordinates relative to x-axis domain (0 to 1)
+                yref="y domain",             # Coordinates relative to y-axis domain (0 to 1)
+                x=1, y=1,                    # Position image anchor at top-right of plot area
+                sizex=1, sizey=1,            # Image covers full width and height
+                xanchor="right",
+                yanchor="top",
+                sizing="stretch",            # Stretch image to fit
+                opacity=0.5,                 # Make semi-transparent
+                layer="below"                # Place behind data points
+            )
+        )
+    ```
+
+**3. Layout and Styling**
+
+Finally, `generate_animation` applies various layout settings to polish the figure:
+
+*   **Icon Size:** Updates the text font size for the main scatter trace to control the emoji size (`fig.update_traces(textfont_size=icon_and_text_size)`).
+*   **Axes:** Hides tick labels, grid lines, and zero lines for a cleaner appearance, unless `setup_mode=True` (which is useful for initially determining coordinates for `event_position_df`). It also disables zooming (`fixedrange=True`).
+    ```python
+    # From: vidigi/animation.py (Simplified generate_animation function)
+    if not setup_mode:
+        fig.update_xaxes(showticklabels=False, showgrid=False, zeroline=False, fixedrange=True)
+        fig.update_yaxes(showticklabels=False, showgrid=False, zeroline=False, fixedrange=True)
+    ```
+*   **Titles and Legend:** Removes axis titles and the legend (`fig.update_layout(yaxis_title=None, xaxis_title=None, showlegend=False)`).
+*   **Animation Controls:** Optionally removes the play/pause buttons (`if not include_play_button: fig["layout"].pop("updatemenus")`) and sets the frame duration and transition speed.
+    ```python
+    # From: vidigi/animation.py (Simplified generate_animation function)
+    # Adjust speed of animation
+    fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = frame_duration
+    fig.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = frame_transition_duration
+    ```
+
+**Conceptual Flow Diagram**
+
+```{mermaid}
+sequenceDiagram
+    participant Caller as animate_activity_log (or User)
+    participant GA as generate_animation
+    participant PX as plotly.express
+    participant GO as plotly.graph_objects
+    participant Figure
+
+    Caller->>+GA: Call generate_animation(data, layout, scenario, options...)
+    GA->>+PX: px.scatter(data, x="x_final", y="y_final", animation_frame="minute_display", animation_group="patient", text="icon", ...)
+    PX-->>-GA: Return initial Figure object
+    Note over GA, Figure: Figure now contains base animated scatter plot.
+    GA->>+GO: Create Scatter trace for Stage Labels (mode="text")
+    GO-->>-GA: Stage Label trace object
+    GA->>Figure: fig.add_trace(Stage Label trace)
+    alt scenario is provided
+        GA->>GA: Calculate Resource Placeholder positions (using layout, scenario, options)
+        GA->>+GO: Create Scatter trace for Resource Placeholders (mode="markers")
+        GO-->>-GA: Resource Placeholder trace object
+        GA->>Figure: fig.add_trace(Resource Placeholder trace)
+    end
+    alt add_background_image is provided
+        GA->>Figure: fig.add_layout_image(...)
+    end
+    GA->>Figure: fig.update_traces(textfont_size=...)
+    GA->>Figure: fig.update_xaxes(...) / fig.update_yaxes(...)
+    GA->>Figure: fig.update_layout(...)
+    Note over GA, Figure: Figure is now fully configured with static layers and styling.
+    GA-->>-Caller: Return final Figure object
+```
+
+This sequence shows how `generate_animation` builds the final figure layer by layer, starting with the core animation and adding static contextual elements and styling.
+
+## Conclusion
+
+The `generate_animation` function is the final piece of the puzzle in the `vidigi` animation workflow. It acts as the rendering engine, taking the meticulously prepared `full_patient_df_plus_pos` DataFrame (the "film reel" created in Chapter 5) and projecting it onto a visual canvas using Plotly Express's powerful animated scatter plot capabilities.
+
+By mapping entity positions over time, adding contextual static layers like stage labels and resource placeholders derived from the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) and `scenario` object, and applying various styling options, it produces the final, interactive Plotly `Figure` object. This figure visually represents the dynamics captured in your simulation's `event_log`, bringing your model to life.
+
+This chapter concludes our walkthrough of the core components involved in generating animations with `vidigi`, from the high-level facade function down to the final plotting engine. Understanding these pieces allows you to effectively use `vidigi` and troubleshoot or customise the visualisations for your specific simulation models.
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

@@ -1,0 +1,185 @@
+# Chapter 3: Layout Configuration (`event_position_df`)
+
+In the previous chapter, [Chapter 2: Event Log](02_event_log_.qmd), we explored how to structure the `event_log` DataFrame to record the 'who, what, and when' of entity movements in your simulation. Now, we need to tell `vidigi` *where* these events should visually occur on the animation canvas. That's the job of the Layout Configuration, represented by the `event_position_df` DataFrame.
+
+## Motivation: Drawing the Map
+
+Imagine you're describing the layout of our simple clinic to someone. You might say, "The entrance is on the left, then there's a waiting area in the middle, and the treatment rooms are further to the right." To create a meaningful animation, `vidigi` needs precisely this kind of spatial information. Without it, all the entities would just pile up at the default coordinates (0,0)!
+
+The `event_position_df` acts as a blueprint or a map for your animation's background. It defines fixed anchor points on the 2D plane for each key stage or event in your process. These anchor points are then used by `vidigi` to position entities, whether they are queuing or using a resource.
+
+## The Core Concept: A DataFrame for Coordinates
+
+The `event_position_df` is, fundamentally, a pandas DataFrame. Each row defines the base visual location for a specific event name that appears in your `event_log`.
+
+Think of it as a lookup table mapping event names to coordinates and other display properties.
+
+### Required Columns
+
+Your `event_position_df` *must* contain the following columns:
+
+1.  **`event`**: A string that matches a specific event name found in the `event` column of your `event_log`. Critically, this DataFrame must include entries for `'arrival'` and the special `'exit'` event (which `vidigi` uses internally, as created by `reshape_for_animations`). It should also include entries for any `event` names you used in the `event_log` that correspond to the start of a queue (`event_type='queue'`) or the start of resource use (`event_type='resource_use'`) that you wish to visualise. You generally *don't* need entries for `event_type='resource_use_end'` or `'depart'` (as `'exit'` handles the final visual state).
+2.  **`x`**: A numerical value representing the base X-coordinate for this event on the animation canvas.
+3.  **`y`**: A numerical value representing the base Y-coordinate for this event.
+
+### Optional Columns
+
+You can add these columns for more control and clarity:
+
+4.  **`label`**: A string providing a human-readable name for the stage corresponding to this event (e.g., "Waiting Area", "Treatment Room 1"). If the `display_stage_labels` parameter in `animate_activity_log` is `True`, these labels will be drawn on the animation near the `(x, y)` coordinates. It's good practice to always include this, even if you don't display them initially.
+5.  **`resource`**: A string that links an event associated with resource usage (i.e., one where entities have `event_type='resource_use'` in the `event_log`) to an attribute name in your `scenario` object. This attribute in the `scenario` object should hold the *capacity* (number of available instances) of that resource. For example, if your event is `'use_nurse'` and your `scenario` object has an attribute `scenario.n_nurses = 3`, you would put `'n_nurses'` in the `resource` column for the `'use_nurse'` row. This tells `vidigi` how many resource 'slots' to visualise and allows it to correctly place entities using specific `resource_id`s (like nurse 1, nurse 2, nurse 3). This column should be `None` or `NaN` for non-resource-use events like `'arrival'` or queue events.
+
+## Usage Example: Defining the Clinic Layout
+
+Let's revisit our clinic example and define its layout. Suppose we have arrival, a waiting area (`'wait_nurse'` event), a treatment area (`'use_nurse'` event), and the exit point. We also have a `scenario` object where `scenario.n_nurses` defines the number of nurses.
+
+```python
+import pandas as pd
+import numpy as np
+
+# Example event_position_df
+event_position_df = pd.DataFrame([
+    {'event': 'arrival',        # Matches 'arrival' in event_log
+     'x': 50, 'y': 200,
+     'label': "Arrival Area",   # Human-readable label
+     'resource': np.nan},       # Not a resource use step
+
+    {'event': 'wait_nurse',     # Matches 'wait_nurse' (queue event) in event_log
+     'x': 150, 'y': 250,
+     'label': "Waiting Area",
+     'resource': np.nan},       # Queue, not direct resource use
+
+    {'event': 'use_nurse',      # Matches 'use_nurse' (resource_use event) in event_log
+     'x': 250, 'y': 150,
+     'label': "Treatment Bays",
+     'resource': 'n_nurses'},   # Links to scenario.n_nurses for capacity
+
+    {'event': 'exit',           # Matches the special 'exit' event
+     'x': 350, 'y': 200,
+     'label': "Exit Point",
+     'resource': np.nan}        # Not a resource use step
+])
+
+# --- Placeholder Scenario Object (Assume this exists elsewhere) ---
+class Scenario:
+    n_nurses = 2 # Let's say there are 2 nurses
+scenario_config = Scenario()
+# --- End Placeholder ---
+
+print(event_position_df)
+```
+
+Output:
+```
+          event    x    y             label  resource
+0       arrival   50  200      Arrival Area       NaN
+1    wait_nurse  150  250      Waiting Area       NaN
+2     use_nurse  250  150    Treatment Bays  n_nurses
+3          exit  350  200        Exit Point       NaN
+```
+
+This DataFrame provides `vidigi` with the necessary spatial anchors.
+
+## How `vidigi` Uses the Layout
+
+The `event_position_df` is primarily used within the [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd) stage, specifically by the `generate_animation_df` function, and also by the [Chapter 6: Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd) function for drawing labels and resource placeholders.
+
+Here’s a conceptual walkthrough of how `generate_animation_df` uses it:
+
+1.  **Input:** It receives the snapshot DataFrame (output from `reshape_for_animations`, detailing which entity is performing which `event` at each `minute`) and the `event_position_df`.
+2.  **Merge/Lookup:** For each row in the snapshot DataFrame, it looks up the corresponding `event` in `event_position_df` to find the base `x` and `y` coordinates.
+3.  **Calculate Final Position (`x_final`, `y_final`):**
+    *   **For simple events (like `'arrival'`, `'exit'`):** The `x_final`, `y_final` might be directly set to the base `x`, `y`.
+    *   **For `'queue'` events:** It calculates the entity's position within the queue (based on arrival time at that queue step, using the `rank` column generated earlier). The queue typically extends *leftwards* from the base `x` coordinate. So, the first person might be at `x`, the second at `x - gap_between_entities`, the third at `x - 2 * gap_between_entities`, and so on. If `wrap_queues_at` is set, it will wrap the queue onto new rows below the base `y` coordinate.
+    *   **For `'resource_use'` events:** It uses the `resource_id` associated with the entity (from the `event_log`) and the base `x`, `y`. Similar to queues, resources are typically placed extending leftwards. If `resource='n_nurses'`, resource 1 might be at `x - gap_between_resources`, resource 2 at `x - 2 * gap_between_resources`, etc. The entity is placed at the coordinates corresponding to its assigned `resource_id`. Wrapping via `wrap_resources_at` also applies.
+4.  **Output:** It returns an enhanced DataFrame (`full_patient_df_plus_pos`) which now includes the calculated `x_final` and `y_final` coordinates for every entity at every time snapshot.
+
+The `generate_animation` function then uses this `full_patient_df_plus_pos` to create the scatter plot. It also uses the original `event_position_df` again:
+*   To draw the stage labels (if `display_stage_labels=True`) near the base `x`, `y` coordinates.
+*   To draw placeholder markers for the available resources (using the `resource` column to find the capacity in the `scenario` object) near the base `x`, `y` coordinates for resource stages.
+
+## Linking Resources via the `scenario` Object
+
+The connection between `event_position_df` and the `scenario` object is vital for visualising resource utilisation accurately.
+
+1.  In `event_position_df`, you identify a resource stage (e.g., `'use_nurse'`).
+2.  You add the `resource` column and put the *name of the attribute* in your `scenario` object that holds the capacity (e.g., `'n_nurses'`).
+3.  When `generate_animation` runs, it looks at this row in `event_position_df`.
+4.  It sees `resource = 'n_nurses'`.
+5.  It accesses the provided `scenario` object and retrieves the value of `getattr(scenario, 'n_nurses')` (which might be, say, 2).
+6.  It now knows it needs to display 2 placeholder resource markers (e.g., light blue circles) near the base coordinates `(x, y)` defined for `'use_nurse'`.
+7.  Simultaneously, `generate_animation_df` uses this information (and the `resource_id` from the event log) to ensure Patient A using Nurse 1 is placed at the coordinates for resource slot 1, and Patient B using Nurse 2 is placed at the coordinates for resource slot 2.
+
+Here's a simplified snippet from `vidigi.animation.generate_animation` showing how the resource count is retrieved:
+
+```python
+# From: vidigi/animation.py (Simplified inside generate_animation)
+
+def generate_animation(
+        # ... other parameters ...
+        event_position_df,
+        scenario=None,
+        # ... other parameters ...
+):
+    # ... setup code ...
+
+    # --- Resource Placeholder Generation ---
+    if scenario is not None:
+        # 1. Filter event_position_df to rows where 'resource' is not null
+        events_with_resources = event_position_df[event_position_df['resource'].notnull()].copy()
+
+        # 2. Get the count for each resource from the scenario object
+        #    It applies getattr(scenario, resource_name) to each row
+        events_with_resources['resource_count'] = events_with_resources['resource'].apply(
+            lambda resource_name: getattr(scenario, resource_name)
+        )
+
+        # 3. Calculate positions for each resource instance marker
+        #    (Simplified - actual code handles wrapping and gaps)
+        resource_positions = []
+        for _, row in events_with_resources.iterrows():
+            base_x, base_y = row['x'], row['y']
+            count = row['resource_count']
+            for i in range(count):
+                # Example: place leftwards
+                res_x = base_x - (gap_between_resources * (i + 1))
+                res_y = base_y # (Actual code handles wrapping in y-dimension too)
+                resource_positions.append({'x': res_x, 'y': res_y})
+
+        resource_pos_df = pd.DataFrame(resource_positions)
+
+        # 4. Add a scatter trace to the plot for these resource positions
+        fig.add_trace(go.Scatter(
+            x=resource_pos_df['x'],
+            y=resource_pos_df['y'] - 10, # Offset slightly
+            mode="markers",
+            marker=dict(color='LightSkyBlue', size=15, opacity=resource_opacity),
+            hoverinfo='none'
+            # ... other trace parameters ...
+        ))
+
+    # ... code to add entity traces, labels, background image etc. ...
+
+    return fig
+```
+This snippet illustrates how the `resource` column acts as the bridge between the layout definition and the scenario's parameters to determine *how many* resource slots to show. The actual placement of *entities* into these slots happens in `generate_animation_df` using the `resource_id` from the `event_log`.
+
+## Tips for Setting Up Your Layout
+
+Defining coordinates can sometimes involve a bit of trial and error. Here are a couple of tips:
+
+*   **Use `setup_mode=True`:** When calling `animate_activity_log`, set `setup_mode=True`. This will display the plot axes with grid lines and coordinate values, making it much easier to estimate appropriate `x` and `y` values for your `event_position_df`.
+*   **Sketch it Out:** Draw a rough sketch of your desired layout on paper first. This can help you think about the relative positioning of stages before you start coding the coordinates.
+*   **Iterate:** Don't expect to get it perfect on the first try. Define initial coordinates, run the animation (perhaps with `limit_duration` set low for speed), see how it looks, and adjust the `x`, `y` values in `event_position_df` as needed. The HSMA example in the documentation (`vidigi_docs/adding_vidigi_to_a_simple_simpy_model_hsma_structure.qmd`) shows this iterative process.
+
+## Conclusion
+
+The `event_position_df` is your key tool for controlling the visual layout of your `vidigi` animation. By mapping event names from your simulation log to specific X and Y coordinates, providing human-readable labels, and linking resource-use events to capacities defined in a `scenario` object, you create the essential blueprint that guides how entities are positioned on the screen. It translates the abstract sequence of events from your `event_log` into a spatially meaningful visualisation.
+
+We've seen how this DataFrame specifies base locations and how it interacts with the `scenario` object for resource visualisation. However, correctly logging the `resource_id` for individual resource instances relies on enhancements to standard `simpy` resources. In the next chapter, we'll look at how `vidigi` uses `CustomResource` objects, often managed within `simpy.Store`s, to facilitate this detailed tracking.
+
+Next: [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

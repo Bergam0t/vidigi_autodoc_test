@@ -1,0 +1,199 @@
+# Chapter 1: Animation Facade (`animate_activity_log`)
+
+Welcome to the `vidigi` tutorial! If you're looking to create animated visualisations from your discrete-event simulation (DES) models, you're in the right place. Whether you're modelling patient flow in a hospital, customer movement in a shop, or any other process involving entities moving through steps over time, `vidigi` aims to make visualising it straightforward.
+
+Creating these animations often involves several steps: preparing your raw simulation output, figuring out where each entity should be at specific time points, handling queues and resource usage visually, and finally generating the plot itself. This can be a bit fiddly.
+
+That's where `animate_activity_log` comes in. Think of it as the main control panel or the "easy button" for `vidigi`. It's designed to be the primary function you'll interact with, orchestrating all the necessary background steps to turn your simulation data into a polished animation with minimal fuss.
+
+## The Core Task: Visualising Patient Flow
+
+Let's imagine you've run a simulation of a simple clinic. Your simulation has produced a log detailing when patients arrived, when they started queuing for a nurse, when they began treatment, and when they left. You also have an idea of the physical layout – where the entrance is, where the waiting area is, and where the treatment cubicles are located.
+
+Your goal is to create an animation showing little icons representing patients moving through these stages over the simulated time. You want to see queues forming and shrinking, and patients occupying the treatment cubicles.
+
+This is precisely the sort of task `animate_activity_log` is built for.
+
+## Using the Facade: `animate_activity_log`
+
+To use `animate_activity_log`, you primarily need two key pieces of information, prepared as pandas DataFrames:
+
+1.  **`event_log`**: This DataFrame contains the raw output from your simulation. It lists events (like 'arrival', 'start_queue', 'start_treatment', 'departure') for each entity (e.g., patient), along with the time the event occurred. We'll dive deep into the required format in [Chapter 2: Event Log](02_event_log_.qmd).
+2.  **`event_position_df`**: This DataFrame defines the layout of your animation. It maps each key event (or stage) in your process to specific X and Y coordinates on the animation canvas. Think of it as drawing a map for `vidigi`. More details can be found in [Chapter 3: Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+
+Optionally, you might also provide:
+
+3.  **`scenario`**: A simple Python object (like an instance of a class) that holds information about resource capacities (e.g., number of nurses). This helps `vidigi` visualise the available resources correctly. We touch on resources, especially related to `simpy`, in [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd).
+
+Let's look at a basic example call. Assume you have your `event_log_df` and `event_position_df` ready, and perhaps a `scenario_config` object.
+
+```python
+import pandas as pd
+from vidigi.animation import animate_activity_log
+
+# Assume these DataFrames and object are already defined:
+# event_log_df: Your simulation output log (See Chapter 2)
+# event_position_df: Your layout coordinates (See Chapter 3)
+# scenario_config: An object with resource counts (e.g., scenario_config.n_nurses = 5)
+
+# --- Placeholder DataFrames (Replace with your actual data) ---
+event_log_df = pd.DataFrame({
+    'patient': [1, 1, 1, 2, 2, 2, 1, 2],
+    'event_type': ['arrival_departure', 'queue', 'resource_use', 'arrival_departure', 'queue', 'resource_use', 'arrival_departure', 'arrival_departure'],
+    'event': ['arrival', 'wait_nurse', 'use_nurse', 'arrival', 'wait_nurse', 'use_nurse', 'depart', 'depart'],
+    'time': [0, 10, 15, 5, 12, 20, 35, 40],
+    'resource_id': [None, None, 1, None, None, 2, None, None], # Optional, needed for resource tracking
+    'pathway': ['Routine', 'Routine', 'Routine', 'Routine', 'Routine', 'Routine', 'Routine', 'Routine'] # Optional grouping
+})
+
+event_position_df = pd.DataFrame({
+    'event': ['arrival', 'wait_nurse', 'use_nurse', 'depart'],
+    'x': [50, 150, 250, 350],
+    'y': [200, 200, 200, 200],
+    'label': ['Arrival', 'Waiting Area', 'Treatment Room', 'Departure'], # Human-readable labels
+    'resource': [None, None, 'n_nurses', None] # Link to scenario attribute for resource count
+})
+
+# --- Placeholder Scenario Object ---
+class Scenario:
+    n_nurses = 2
+scenario_config = Scenario()
+# --- End Placeholder Data ---
+
+
+# Generate the animation
+animation_figure = animate_activity_log(
+    event_log=event_log_df,
+    event_position_df=event_position_df,
+    scenario=scenario_config,
+    every_x_time_units=1, # Time interval between animation frames
+    limit_duration=50,    # Maximum simulation time to animate
+    time_display_units='dhm', # Format time as days/hours/minutes
+    icon_and_text_size=20,   # Adjust icon size
+    plotly_height=600,       # Set figure height
+    debug_mode=False         # Turn off verbose output
+)
+
+# To display the animation (e.g., in a Jupyter Notebook or save to HTML)
+# animation_figure.show()
+# animation_figure.write_html("my_clinic_animation.html")
+```
+
+This single function call triggers the entire process. It takes your raw data and layout, performs the necessary calculations to determine entity positions at each time step, and produces an interactive Plotly `Figure` object. This figure contains the animated scatter plot showing your entities moving through the system.
+
+`animate_activity_log` also accepts numerous optional parameters for customisation (like `wrap_queues_at`, `add_background_image`, `frame_duration`, etc.), allowing you to fine-tune the appearance and behaviour of the animation. You can explore these in the function's documentation.
+
+## Under the Bonnet: How `animate_activity_log` Works
+
+So, what happens when you call `animate_activity_log`? It acts like a director, coordinating several backstage functions to prepare the data and generate the final animation. Here's a step-by-step breakdown:
+
+1.  **Input Reception**: `animate_activity_log` receives the `event_log`, `event_position_df`, `scenario` object, and any customisation parameters you've provided.
+2.  **Snapshot Preparation (Reshaping)**: It first calls the `reshape_for_animations` function (detailed in [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)). This function takes the raw `event_log` and transforms it. Instead of just listing *when* events occurred, it creates a "snapshot" DataFrame detailing the state (event/location) of *every* entity at regular time intervals (`every_x_time_units`).
+3.  **Snapshot Preparation (Positioning)**: Next, it passes the reshaped snapshot DataFrame and the `event_position_df` to the `generate_animation_df` function (also covered in [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)). This crucial step calculates the precise X, Y coordinates for each entity in each time snapshot, handling the layout of queues and the assignment of entities to specific resource instances (like nurse 1 vs. nurse 2). It also assigns visual icons (like emojis) to entities.
+4.  **Animation Generation**: Finally, the fully prepared DataFrame (containing entity IDs, icons, time snapshots, and exact X/Y coordinates) is passed to the `generate_animation` function along with the layout (`event_position_df`), scenario details, and customisation parameters (like figure size, background image, etc.). This function (explained in [Chapter 6: Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd)) uses Plotly Express to create the animated scatter plot, setting up the time slider, labels, resource visuals, and other graphical elements.
+5.  **Return Figure**: `animate_activity_log` returns the final Plotly `Figure` object created by `generate_animation`.
+
+We can visualise this orchestration with a sequence diagram:
+
+```{mermaid}
+sequenceDiagram
+    participant User
+    participant Facade as animate_activity_log
+    participant Reshaper as reshape_for_animations
+    participant PosGenerator as generate_animation_df
+    participant Animator as generate_animation
+
+    User->>+Facade: Call animate_activity_log(event_log, pos_df, scenario, params...)
+    Facade->>+Reshaper: Call reshape_for_animations(event_log, params...)
+    Reshaper-->>-Facade: Return snapshot_df
+    Facade->>+PosGenerator: Call generate_animation_df(snapshot_df, pos_df, params...)
+    PosGenerator-->>-Facade: Return positioned_snapshot_df
+    Facade->>+Animator: Call generate_animation(positioned_snapshot_df, pos_df, scenario, params...)
+    Animator-->>-Facade: Return plotly_figure
+    Facade-->>-User: Return plotly_figure
+```
+
+Looking at the source code for `animate_activity_log` (simplified below), you can see this sequence clearly:
+
+```python
+# From: vidigi/animation.py
+
+def animate_activity_log(
+        event_log,
+        event_position_df,
+        scenario=None,
+        # ... many other parameters ...
+        debug_mode=False,
+        custom_entity_icon_list=None
+        ):
+    """
+    Generate an animated visualization of patient flow through a system.
+    (Docstring omitted for brevity)
+    """
+    if debug_mode:
+        start_time_function = time.perf_counter()
+        print(f'Animation function called at {time.strftime("%H:%M:%S", time.localtime())}')
+
+    # Step 1: Reshape the raw event log into time snapshots
+    full_patient_df = reshape_for_animations(
+        event_log,
+        # Pass relevant parameters like every_x_time_units, limit_duration etc.
+        every_x_time_units=every_x_time_units,
+        limit_duration=limit_duration,
+        step_snapshot_max=step_snapshot_max,
+        debug_mode=debug_mode
+    )
+
+    if debug_mode:
+        print(f'Reshaped animation dataframe finished construction at {time.strftime("%H:%M:%S", time.localtime())}')
+
+    # Step 2: Calculate X, Y positions for each entity in each snapshot
+    full_patient_df_plus_pos = generate_animation_df(
+        full_patient_df=full_patient_df,
+        event_position_df=event_position_df,
+        # Pass relevant parameters like wrap_queues_at, gap_between_entities etc.
+        wrap_queues_at=wrap_queues_at,
+        wrap_resources_at=wrap_resources_at,
+        step_snapshot_max=step_snapshot_max,
+        gap_between_entities=gap_between_entities,
+        gap_between_resources=gap_between_resources,
+        gap_between_rows=gap_between_rows,
+        debug_mode=debug_mode,
+        custom_entity_icon_list=custom_entity_icon_list
+    )
+
+    # Step 3: Generate the Plotly animation figure using the positioned data
+    animation = generate_animation(
+        full_patient_df_plus_pos=full_patient_df_plus_pos,
+        event_position_df=event_position_df,
+        scenario=scenario,
+        # Pass relevant customization parameters like plotly_height, add_background_image etc.
+        plotly_height=plotly_height,
+        plotly_width=plotly_width,
+        include_play_button=include_play_button,
+        add_background_image=add_background_image,
+        # ... other parameters ...
+        debug_mode=debug_mode
+    )
+
+    if debug_mode:
+        end_time_function = time.perf_counter()
+        print(f'Total Time Elapsed: {(end_time_function - start_time_function):.2f} seconds')
+
+    # Step 4: Return the final figure
+    return animation
+```
+
+By wrapping these steps, `animate_activity_log` provides a convenient, high-level interface, shielding you from the internal complexities unless you specifically need to delve deeper or use the underlying functions individually.
+
+## Conclusion
+
+In this chapter, we've introduced `animate_activity_log`, the primary function for creating animations with `vidigi`. We've seen how it acts as a facade, taking your core simulation outputs (`event_log`) and layout instructions (`event_position_df`) to produce an animated Plotly figure by orchestrating several internal data preparation and plotting steps.
+
+This "easy button" approach allows you to generate insightful visualisations quickly. However, understanding the data it requires is crucial. In the next chapter, we'll focus on the heart of the input: the `event_log`.
+
+Next: [Chapter 2: Event Log](02_event_log_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

@@ -1,0 +1,297 @@
+# Chapter 5: Prepare for Snapshots, McFly! (`reshape_for_animations` & `generate_animation_df`)
+
+Greetings, Programs! In [Chapter 4: More Input! Giving Your Resources an Upgrade (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd), we learned how to give our resources unique IDs, like giving each Cylon a distinct serial number, so we can track exactly *which* resource (like 'Nurse\_1' or 'Sim\_2') is being used. We ensured our [Event Log](02_event_log_.qmd) now captures this crucial `resource_id`.
+
+But our `event_log` is still just a chronological list of things that happened – like a mission diary dictated into K.I.T.T.'s recorder. It tells us *when* Maverick started waiting, *when* he got 'Sim\_1', *when* he finished. To make an animation, we need something more structured. We need to know *exactly who* is *exactly where* at *specific moments in time*, like freezing frames in a movie. We need to turn that diary into a series of snapshots, ready for the big screen!
+
+This is where the dynamic duo of data transformation comes in: `reshape_for_animations` and `generate_animation_df`. Think of them as the unsung heroes working behind the scenes, like the techs prepping the DeLorean or the crew setting up the shots for *Top Gun*.
+
+## The Mission: From Diary to Movie Frames
+
+Imagine you have K.I.T.T.'s complete sensor logs for a day. It's just a long list: "10:01: Scanned sector Alpha", "10:03: Detected suspicious activity", "10:05: Engaged Turbo Boost". To make a visual replay, you don't just want the list; you want to see K.I.T.T.'s *position* and *status* on a map every, say, 10 seconds.
+
+That's our goal here. We take the raw [Event Log](02_event_log_.qmd) (the diary) and transform it into a frame-by-frame description of the system state (the movie reel).
+
+1.  **`reshape_for_animations`**: Figures out *who* is doing *what* event at regular time intervals (our snapshots).
+2.  **`generate_animation_df`**: Calculates the precise *X, Y coordinates* for each entity in each snapshot, based on their event, status (queuing/using resource), and the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd).
+
+These functions are usually called automatically by the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function, but understanding them helps you see how the magic happens!
+
+## Step 1: Taking the Photos - `reshape_for_animations`
+
+This function is like hitting pause on your VCR at regular intervals during *Back to the Future* to see where Marty, Doc, and the Libyans are at that exact moment.
+
+**Purpose:** To convert the continuous stream of events into discrete snapshots in time.
+
+**Input:** The [Event Log](02_event_log_.qmd) DataFrame.
+
+**Output:** A new DataFrame. Each row represents a specific `patient` at a specific `minute` (or whatever `every_x_time_units` you choose). It tells you the `event` they were last recorded doing *before* or *at* that `minute`. It also calculates their `rank` if multiple patients are doing the same event (e.g., who is 1st, 2nd, 3rd in the 'wait\_for\_simulator' queue at that minute).
+
+Let's imagine a tiny piece of our Top Gun [Event Log](02_event_log_.qmd):
+
+```python
+# --- Input Event Log (Simplified) ---
+event_data = [
+    {'patient': 'Maverick', 'event': 'arrival', 'time': 0, 'event_type': 'arrival_departure'},
+    {'patient': 'Goose', 'event': 'arrival', 'time': 5, 'event_type': 'arrival_departure'},
+    {'patient': 'Maverick', 'event': 'wait_for_simulator', 'time': 1, 'event_type': 'queue'},
+    {'patient': 'Goose', 'event': 'wait_for_simulator', 'time': 6, 'event_type': 'queue'},
+    {'patient': 'Maverick', 'event': 'start_simulator', 'time': 10, 'event_type': 'resource_use', 'resource_id': 'Sim_1'},
+    {'patient': 'Goose', 'event': 'start_simulator', 'time': 15, 'event_type': 'resource_use', 'resource_id': 'Sim_2'}
+]
+event_log_df = pd.DataFrame(event_data)
+# --- End Input ---
+```
+
+If we call `reshape_for_animations` (conceptually, with `every_x_time_units=5`), it might produce snapshots like this:
+
+```python
+# --- Output Snapshots (Conceptual from reshape_for_animations) ---
+snapshot_data = [
+    # Minute 0: Only Maverick arrived
+    {'minute': 0, 'patient': 'Maverick', 'event': 'arrival', 'event_type': 'arrival_departure', 'rank': 1.0},
+    # Minute 5: Maverick is waiting, Goose just arrived
+    {'minute': 5, 'patient': 'Maverick', 'event': 'wait_for_simulator', 'event_type': 'queue', 'rank': 1.0},
+    {'minute': 5, 'patient': 'Goose', 'event': 'arrival', 'event_type': 'arrival_departure', 'rank': 1.0},
+    # Minute 10: Maverick started Sim 1, Goose is now waiting (rank 1 in queue)
+    {'minute': 10, 'patient': 'Maverick', 'event': 'start_simulator', 'event_type': 'resource_use', 'resource_id': 'Sim_1', 'rank': 1.0},
+    {'minute': 10, 'patient': 'Goose', 'event': 'wait_for_simulator', 'event_type': 'queue', 'rank': 1.0},
+    # Minute 15: Maverick still in Sim 1, Goose started Sim 2
+    {'minute': 15, 'patient': 'Maverick', 'event': 'start_simulator', 'event_type': 'resource_use', 'resource_id': 'Sim_1', 'rank': 1.0},
+    {'minute': 15, 'patient': 'Goose', 'event': 'start_simulator', 'event_type': 'resource_use', 'resource_id': 'Sim_2', 'rank': 2.0} # Note: Rank might be based on resource_id here
+]
+reshaped_df = pd.DataFrame(snapshot_data)
+print(reshaped_df)
+# --- End Output ---
+```
+
+This `reshaped_df` tells us exactly who was doing what at each 5-minute interval. It's the foundation for our animation frames!
+
+## Step 2: Setting the Scene - `generate_animation_df`
+
+Okay, we have our snapshots telling us *who* is doing *what* and *when*. Now we need to figure out *where* they should be on the screen. This function is like the director telling the actors their exact marks on the stage floor, using the script (snapshots) and the set design ([Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd)).
+
+**Purpose:** To calculate the final X and Y screen coordinates for each entity in each snapshot.
+
+**Input:**
+1.  The snapshot DataFrame produced by `reshape_for_animations`.
+2.  The [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) DataFrame.
+
+**Output:** A DataFrame almost identical to the input snapshot DataFrame, but with crucial new columns:
+*   `x_final`: The calculated horizontal position.
+*   `y_final`: The calculated vertical position.
+*   `icon`: An assigned emoji icon for the entity (like giving each Smurf a unique hat... wait, wrong reference... like giving each Autobot a unique symbol!).
+
+It uses the `event`, `event_type`, `rank`, and `resource_id` from the snapshot, along with the base `x` and `y` from the layout, to determine the final position.
+
+*   **Simple Events:** (like 'arrival', 'depart') often just use the base X, Y from the layout.
+*   **Queues:** Patients line up. The `rank` determines their position in the line (e.g., rank 1 is at `base_x - gap`, rank 2 at `base_x - 2*gap`). It can even wrap the queue into multiple rows like the aliens in *Space Invaders* if it gets too long!
+*   **Resource Use:** The position is calculated based on the *specific* `resource_id` (e.g., 'Sim\_1' might be at `base_x - gap`, 'Sim\_2' at `base_x - 2*gap`). This ensures Maverick always appears at the *same* simulator spot when using 'Sim\_1'.
+
+Let's take one snapshot from our previous example (Minute 10) and imagine our layout:
+
+```python
+# --- Input Snapshot Row (Minute 10) ---
+snapshot_row_mav = {'minute': 10, 'patient': 'Maverick', 'event': 'start_simulator', 'event_type': 'resource_use', 'resource_id': 'Sim_1', 'rank': 1.0}
+snapshot_row_goose = {'minute': 10, 'patient': 'Goose', 'event': 'wait_for_simulator', 'event_type': 'queue', 'rank': 1.0}
+
+# --- Input Layout Info (Simplified) ---
+layout_info = {
+    'start_simulator': {'x': 350, 'y': 200},
+    'wait_for_simulator': {'x': 200, 'y': 200}
+}
+# --- Assume gap_between_entities = 10, gap_between_resources = 20 ---
+gap_entities = 10
+gap_resources = 20
+```
+
+`generate_animation_df` would process these rows:
+
+```python
+# --- Output with Positions (Conceptual from generate_animation_df) ---
+
+# Maverick (Resource Use): Position depends on resource_id (Sim_1 is ID 1)
+mav_x_final = layout_info['start_simulator']['x'] - (1 * gap_resources) # 350 - 20 = 330
+mav_y_final = layout_info['start_simulator']['y'] # 200
+output_row_mav = {**snapshot_row_mav, 'x_final': mav_x_final, 'y_final': mav_y_final, 'icon': '🧔🏼'}
+
+# Goose (Queue): Position depends on rank (Rank 1)
+goose_x_final = layout_info['wait_for_simulator']['x'] - (1 * gap_entities) # 200 - 10 = 190
+goose_y_final = layout_info['wait_for_simulator']['y'] # 200
+output_row_goose = {**snapshot_row_goose, 'x_final': goose_x_final, 'y_final': goose_y_final, 'icon': '👨🏻‍🦰'}
+
+print(output_row_mav)
+print(output_row_goose)
+# --- End Output ---
+```
+
+Now, each entity in each snapshot has precise coordinates and an icon. This is the data that directly feeds the animation engine! It's like having the final shooting script with exact camera angles and actor positions marked.
+
+## How It Fits Together: The Assembly Line
+
+Remember the flow from [Chapter 1: Great Scott! Making Animations Easy with `animate_activity_log`](01_animation_facade_animate_activity_log_.qmd)? `reshape_for_animations` and `generate_animation_df` are the crucial middle steps orchestrated by the main function:
+
+```{mermaid}
+sequenceDiagram
+    participant AAL as animate_activity_log
+    participant RFA as reshape_for_animations
+    participant GADF as generate_animation_df
+    participant GA as generate_animation
+
+    AAL->>RFA: Call with event_log
+    Note over RFA: Process log into time snapshots (who/what/when)
+    RFA-->>AAL: Return reshaped_df (Snapshots)
+    AAL->>GADF: Call with reshaped_df & event_position_df
+    Note over GADF: Calculate final X,Y positions based on event, rank, resource_id & layout. Assign icons.
+    GADF-->>AAL: Return data_with_positions (Animation-ready data)
+    AAL->>GA: Call with data_with_positions
+    GA-->>AAL: Return Plotly Figure
+```
+
+These two functions handle all the complex data wrangling, turning your raw simulation output into perfectly formatted input for the final animation step.
+
+## Under the Hood: Like Looking Inside Johnny 5
+
+Let's peek briefly at the circuits inside `vidigi/prep.py` where these functions live. No need to grab your screwdriver like Stephanie trying to fix Number 5!
+
+### `reshape_for_animations` Internals
+
+Conceptually, this function works like this:
+
+1.  **Pivot Log:** It first reshapes the event log slightly to easily find the 'arrival' and 'depart' times for each patient.
+2.  **Iterate Through Time:** It loops through time, usually in steps defined by `every_x_time_units` (e.g., 0, 10, 20...).
+3.  **Find Active Patients:** At each `minute`, it identifies patients who have arrived *before* or *at* this minute and have departed *after* this minute (or haven't departed yet). These are the patients "on screen" at this time.
+4.  **Get Latest Event:** For each active patient, it looks back through their event history *up to this minute* and finds their single most recent event. This defines their current state (e.g., 'wait\_for\_simulator' or 'start\_simulator').
+5.  **Rank Patients:** If multiple patients are in the same state (e.g., multiple people in the 'wait\_for\_simulator' queue), it ranks them based on when they entered that state (using the original event log index as a tie-breaker).
+6.  **Limit Snapshot Size:** It might cap the number of patients shown per event per snapshot (`step_snapshot_max`) to keep things tidy.
+7.  **Store Snapshot:** It stores the state (event, type, rank, etc.) for all active patients at this `minute`.
+8.  **Add Exit Step:** After processing all minutes, it adds a final 'exit' event for each patient slightly after their last recorded event, ensuring they visually leave the screen.
+9.  **Combine & Return:** It combines all the snapshots into one big DataFrame.
+
+Here's a simplified conceptual code snippet:
+
+```python
+# --- Inside reshape_for_animations (Conceptual - vidigi/prep.py) ---
+import pandas as pd
+
+def reshape_for_animations_simplified(event_log, every_x_time_units):
+    all_snapshots = []
+    # Get arrival/departure times easily (details omitted)
+    pivoted_log = event_log.pivot_table(...)
+
+    max_time = event_log['time'].max() # Find simulation end time
+
+    # Loop through time in steps
+    for minute in range(0, max_time + every_x_time_units, every_x_time_units):
+
+        # Find patients active at this 'minute' (details omitted)
+        active_patients = find_active_patients(pivoted_log, minute)
+
+        if active_patients:
+            # Get all events for active patients up to 'minute'
+            relevant_events = event_log[
+                (event_log['patient'].isin(active_patients)) &
+                (event_log['time'] <= minute)
+            ]
+
+            # Find the single latest event for each patient
+            latest_states = relevant_events.sort_values('time').groupby('patient').tail(1)
+
+            # Rank patients within the same event (e.g., queue order)
+            latest_states['rank'] = latest_states.groupby('event')['time'].rank(method='first')
+
+            # Add the current minute to the snapshot data
+            latest_states['minute'] = minute
+            all_snapshots.append(latest_states)
+
+    # Combine all snapshots into one DataFrame
+    full_patient_df = pd.concat(all_snapshots, ignore_index=True)
+
+    # Add a final 'exit' step for cleanup (details omitted)
+    full_patient_df = add_final_exit_step(full_patient_df, every_x_time_units)
+
+    return full_patient_df.sort_values(["minute", "event"])
+# --- End Conceptual Code ---
+```
+
+### `generate_animation_df` Internals
+
+This function takes the snapshots and layout and calculates positions:
+
+1.  **Merge Layout:** It merges the snapshot DataFrame with the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) based on the `event` name. Now each snapshot row knows the *base* X and Y for its event.
+2.  **Separate by Type:** It often handles different `event_type` groups separately (queues, resource use, others).
+3.  **Calculate Queue Positions:**
+    *   For `queue` events, it calculates the row and column within the queue based on the `rank` and the `wrap_queues_at` parameter.
+    *   It computes `x_final` by subtracting an offset (based on column and `gap_between_entities`) from the base `x`.
+    *   It computes `y_final` by adding an offset (based on row and `gap_between_rows`) to the base `y`.
+4.  **Calculate Resource Positions:**
+    *   For `resource_use` events, it uses the `resource_id` (which is usually numeric after `populate_store`) and `wrap_resources_at` similarly to calculate row and column.
+    *   It computes `x_final` and `y_final` using offsets based on the resource's column/row and `gap_between_resources`/`gap_between_rows`.
+5.  **Handle Other Events:** For arrivals, departures, etc., `x_final` and `y_final` are usually just set to the base `x` and `y`.
+6.  **Assign Icons:** It assigns a unique icon from a list (you can provide a `custom_entity_icon_list`) to each unique `patient` ID. Think of it like the machine in *Short Circuit* assigning laser targets – but with emojis!
+7.  **Combine & Return:** It concatenates the processed groups back into a single DataFrame with `x_final`, `y_final`, and `icon` columns added.
+
+Simplified conceptual code:
+
+```python
+# --- Inside generate_animation_df (Conceptual - vidigi/prep.py) ---
+import pandas as pd
+import numpy as np
+
+def generate_animation_df_simplified(snapshots_df, layout_df, wrap_queues_at, gap_entities, gap_rows):
+
+    # Merge snapshots with layout base positions
+    df_with_base_pos = pd.merge(snapshots_df, layout_df, on='event', how='left')
+
+    # --- Process Queues ---
+    queues = df_with_base_pos[df_with_base_pos['event_type'] == 'queue'].copy()
+    if not queues.empty:
+        # Calculate row number (0-based)
+        queues['row'] = np.floor((queues['rank'] - 1) / wrap_queues_at)
+        # Calculate position within the row (0-based, adjusted for rank starting at 1)
+        queues['col_in_row'] = (queues['rank'] - 1) % wrap_queues_at
+        # Calculate final positions
+        queues['x_final'] = queues['x'] - queues['col_in_row'] * gap_entities
+        queues['y_final'] = queues['y'] + queues['row'] * gap_rows
+
+    # --- Process Resources (Similar logic using resource_id) ---
+    resources = df_with_base_pos[df_with_base_pos['event_type'] == 'resource_use'].copy()
+    # ... similar x_final, y_final calculation using resource_id ...
+    if not resources.empty:
+        # Simplified: Assume base position for this example
+        resources['x_final'] = resources['x']
+        resources['y_final'] = resources['y']
+
+
+    # --- Process Others ---
+    others = df_with_base_pos[~df_with_base_pos['event_type'].isin(['queue', 'resource_use'])].copy()
+    if not others.empty:
+        others['x_final'] = others['x']
+        others['y_final'] = others['y']
+
+    # Combine results
+    final_df = pd.concat([queues, resources, others], ignore_index=True)
+
+    # Assign icons to patients (details omitted)
+    final_df = assign_icons(final_df)
+
+    return final_df
+# --- End Conceptual Code ---
+```
+
+These functions do the heavy lifting of data preparation so the final animation step can be smooth as hover-converting a DeLorean.
+
+## Conclusion: Data Reshaped, Positions Calculated!
+
+Whoa, heavy! We've seen how `vidigi` takes the raw [Event Log](02_event_log_.qmd) – our simulation's diary – and uses the tag team of `reshape_for_animations` and `generate_animation_df` to turn it into perfectly structured, animation-ready data.
+
+*   `reshape_for_animations` acts like a time machine, taking snapshots to tell us *who* is doing *what* at regular intervals.
+*   `generate_animation_df` acts like a choreographer, using those snapshots and the [Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd) to determine the *exact screen coordinates* for every entity, handling queues and resource assignments like a boss.
+
+Now we have a DataFrame where every row represents an entity at a specific time *and* a specific location on screen, complete with an icon. It's like the final, detailed storyboard for our movie. All that's left is to actually film it!
+
+Get ready to yell "Action!" as we move to the final step: [Chapter 6: Animation Generation (`generate_animation`)](06_animation_generation_generate_animation_.qmd).
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

@@ -1,0 +1,250 @@
+# Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)
+
+In [Chapter 3: Layout Configuration (`event_position_df`)](03_layout_configuration_event_position_df_.qmd), we learned how to map simulation events to visual locations on the animation canvas, including defining base positions for resource areas and linking them to resource capacities via a `scenario` object. However, to make the animation truly informative, we often need to see *which specific instance* of a resource an entity is using. Is Patient A being seen by Nurse 1 or Nurse 2? Standard `simpy` resources don't make this easy to track. This chapter explores how `vidigi` overcomes this limitation.
+
+## Motivation: Giving Resources an Identity Badge
+
+Imagine our clinic simulation again. We have three nurses, represented by a `simpy.Resource` with a capacity of 3. When a patient seizes a nurse, `simpy` simply decrements the available count. It doesn't inherently track *which* of the three available "slots" the patient occupies. From `simpy`'s perspective, they are fungible.
+
+However, for visualisation with `vidigi`, this poses a problem. If we want to show Patient A consistently occupying, say, the leftmost treatment bay icon throughout their service time, we need a way to uniquely identify that bay (or the nurse assigned to it). If Patient A uses a resource, then later Patient B uses one, we need to know if Patient B got the *same* resource instance or a different one, so `vidigi` can place their icon correctly.
+
+Standard `simpy.Resource` objects don't have a built-in, persistent ID for each unit of capacity. `vidigi` employs a common workaround pattern using standard `simpy` components combined with a custom class to address this. The core idea is to replace the single `simpy.Resource` with a `simpy.Store` containing multiple, individually identifiable resource objects.
+
+## Key Concepts: The `Store`, the `CustomResource`, and the Helper
+
+This enhancement relies on three components working together:
+
+1.  **`simpy.Store`**: This is a standard Simpy class representing a buffered store of Python objects. Think of it like a shelf or a container. You can `put` items onto the shelf and `get` items off it. Crucially, when you `get` an item, you get that *specific object* back, which you can later `put` back onto the shelf. This ability to handle distinct objects is key.
+2.  **`vidigi.utils.CustomResource`**: This is a very simple class provided by `vidigi`. It inherits directly from `simpy.Resource` but adds one crucial attribute: `id_attribute`. We use this to give each individual resource instance (like a single nurse or a specific bed) a unique identifier (e.g., 1, 2, 3, or "Nurse_A", "Nurse_B").
+3.  **`vidigi.utils.populate_store`**: This is a helper function provided by `vidigi` that simplifies the process of creating multiple `CustomResource` instances and putting them into a `simpy.Store` at the beginning of your simulation.
+
+The pattern is: instead of creating one `simpy.Resource(env, capacity=3)` for our nurses, we create a `simpy.Store(env)` and then use `populate_store` to fill that store with three separate `CustomResource(env, capacity=1)` objects, each having a unique `id_attribute` (e.g., 1, 2, and 3).
+
+## How to Use This Pattern in Your Simpy Model
+
+Let's see how you'd modify a typical `simpy` model (following the HSMA structure mentioned in the context) to use this pattern.
+
+**1. Initial Resource Setup (The Old Way)**
+
+Previously, you might initialise your nurses resource like this in your `Model` class's `init_resources` method:
+
+```python
+# --- Inside your Model class ---
+import simpy
+# Assume 'g' is your parameter class, e.g., g.n_nurses = 3
+
+# def init_resources(self):
+#     '''
+#     Init the number of resources (OLD WAY)
+#     '''
+#     self.nurses = simpy.Resource(self.env, capacity=g.n_nurses)
+```
+
+**2. Modified Resource Setup (The `vidigi` Way)**
+
+Using the `vidigi` pattern, you replace the above with:
+
+```python
+# --- Inside your Model class ---
+import simpy
+from vidigi.utils import populate_store, CustomResource
+# Assume 'g' is your parameter class, e.g., g.n_nurses = 3
+
+def init_resources(self):
+    '''
+    Init the number of resources (VIDIGI WAY)
+    '''
+    # 1. Create a Simpy Store instead of a Resource
+    self.nurses_store = simpy.Store(self.env)
+
+    # 2. Use populate_store to fill it with CustomResource instances
+    populate_store(
+        num_resources=g.n_nurses,      # How many nurses?
+        simpy_store=self.nurses_store, # Which store to fill?
+        sim_env=self.env               # The simpy environment
+    )
+    # Now, self.nurses_store contains g.n_nurses CustomResource objects,
+    # each with capacity=1 and a unique id_attribute (1, 2, 3, ...)
+```
+
+**3. Requesting a Resource**
+
+In your `simpy` process function (e.g., `attend_clinic`), instead of using `with self.nurses.request() as req:`, you now need to `get` an item from the store:
+
+```python
+# --- Inside your Simpy process function (e.g., attend_clinic) ---
+
+# Old way:
+# with self.nurses.request() as req:
+#     yield req
+#     # ... process using the resource ...
+
+# New way:
+# 1. Get a specific CustomResource instance from the store
+nurse_resource = yield self.nurses_store.get()
+# nurse_resource is now one of the CustomResource objects we created,
+# e.g., the one with nurse_resource.id_attribute == 2
+
+# ... process using the resource (e.g., yield self.env.timeout(treatment_time)) ...
+```
+
+**4. Logging the Resource ID**
+
+This is the crucial step for `vidigi`. Now that you have the specific `nurse_resource` object, you can access its unique `id_attribute` when logging the start and end of resource use, as required by the [Chapter 2: Event Log](02_event_log_.qmd) format:
+
+```python
+# --- Inside your Simpy process function ---
+# Just after getting the nurse_resource (yield self.nurses_store.get())
+
+# Log the start of resource use, including the ID
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'resource_use',
+    'event': 'use_nurse', # Your event name
+    'time': self.env.now,
+    'resource_id': nurse_resource.id_attribute # <-- The unique ID!
+})
+
+# ... yield self.env.timeout(treatment_time) ...
+
+# Just before releasing the nurse_resource
+# Log the end of resource use, including the ID
+self.event_log.append({
+    'patient': patient.identifier,
+    'pathway': 'Routine',
+    'event_type': 'resource_use_end',
+    'event': 'finish_nurse', # Your event name
+    'time': self.env.now,
+    'resource_id': nurse_resource.id_attribute # <-- The same unique ID!
+})
+```
+
+**5. Releasing the Resource**
+
+Because you explicitly `.get()` the resource object from the store, you must explicitly `.put()` it back when you're finished, so other entities can use it. The `with` statement doesn't automatically handle this for `simpy.Store`.
+
+```python
+# --- Inside your Simpy process function ---
+# After logging the resource_use_end event
+
+# Put the specific nurse_resource object back into the store
+self.nurses_store.put(nurse_resource)
+```
+
+By making these changes, your `event_log` will now contain the specific `resource_id` for each resource interaction. `vidigi`'s downstream functions ([Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)) can then use this ID to consistently place the patient's icon at the correct resource slot in the animation.
+
+## Under the Bonnet: Implementation Details
+
+Let's peek at the code for `CustomResource` and `populate_store` to see how simple they are.
+
+**`vidigi.utils.CustomResource`**
+
+As mentioned, this is just `simpy.Resource` with an added `id_attribute`.
+
+```python
+# From: vidigi/utils.py
+
+import simpy
+
+class CustomResource(simpy.Resource):
+    """
+    A custom resource class that extends simpy.Resource with an additional ID attribute.
+    (Docstring truncated for brevity - see source/docs for full details)
+    """
+    def __init__(self, env, capacity, id_attribute=None):
+        # Call the parent simpy.Resource constructor
+        super().__init__(env, capacity)
+        # Store the provided ID
+        self.id_attribute = id_attribute
+
+    # The request and release methods are inherited directly from simpy.Resource
+    # We override them here mainly for documentation/potential extension,
+    # but they currently just call the parent methods.
+    def request(self, *args, **kwargs):
+        """ Request the resource. """
+        return super().request(*args, **kwargs)
+
+    def release(self, *args, **kwargs):
+        """ Release the resource. """
+        return super().release(*args, **kwargs)
+```
+
+It primarily serves as a way to attach the `id_attribute` to a standard `simpy` resource mechanism.
+
+**`vidigi.utils.populate_store`**
+
+This function automates the creation and storing of `CustomResource` instances.
+
+```python
+# From: vidigi/utils.py
+
+def populate_store(num_resources, simpy_store, sim_env):
+    """
+    Populate a SimPy Store [...] with CustomResource objects.
+    (Docstring truncated for brevity - see source/docs for full details)
+
+    Parameters
+    ----------
+    num_resources : int
+        The number of CustomResource objects to create and add to the store.
+    simpy_store : simpy.Store or vidigi.utils.VidigiPriorityStore
+        The SimPy Store object to populate with resources.
+    sim_env : simpy.Environment
+        The SimPy environment in which the resources and store exist.
+    """
+    # Loop from 0 up to (but not including) num_resources
+    for i in range(num_resources):
+        # Create a CustomResource instance
+        resource_instance = CustomResource(
+            env=sim_env,
+            capacity=1, # Each individual resource instance has capacity 1
+            id_attribute = i + 1 # Assign a unique ID, starting from 1
+        )
+        # Put the created resource into the provided store
+        simpy_store.put(resource_instance)
+```
+
+It simply loops `num_resources` times, creating a `CustomResource` with `capacity=1` and an ID from 1 up to `num_resources`, and puts each one into the specified `simpy_store`.
+
+**Conceptual Flow**
+
+We can visualise the setup and usage flow like this:
+
+```{mermaid}
+graph TD
+    A[Start Simulation Setup] --> B(Create `simpy.Store`);
+    B --> C{Call `populate_store`};
+    C --> D[Loop `num_resources` times];
+    D -- Create --> E[`CustomResource(id=i+1)`];
+    E -- Put into --> B;
+    D -- Loop finished --> F[Store is populated];
+
+    subgraph Simulation Run
+        G[Entity needs resource] --> H{`yield store.get()`};
+        H -- Returns --> I[`CustomResource` instance];
+        I -- Access ID --> J(Log `resource_id = instance.id_attribute`);
+        J --> K[Use resource, e.g., `yield timeout`];
+        K --> L(Log `resource_use_end`);
+        L --> M{`store.put(instance)`};
+        M --> N[Resource available again];
+    end
+
+    F --> G;
+```
+
+This pattern leverages standard `simpy` building blocks (`Store`, `Resource`) with minimal additions (`CustomResource`, `populate_store`) to achieve the necessary tracking for detailed visualisation in `vidigi`.
+
+*(Note: `vidigi` also provides `VidigiPriorityStore` and `PriorityGet` for scenarios requiring priority queueing with stores, based on standard Simpy patterns. These work similarly but allow specifying priorities when getting items from the store.)*
+
+## Conclusion
+
+We've seen why standard `simpy.Resource` objects aren't quite sufficient for `vidigi`'s need to track individual resource instances. By using a `simpy.Store` filled with `vidigi.utils.CustomResource` objects (conveniently set up using `vidigi.utils.populate_store`), we can give each resource instance a unique `id_attribute`. This ID is then logged in the `event_log` whenever an entity starts or stops using that specific resource instance.
+
+This simple enhancement to your `simpy` model unlocks the ability for `vidigi` to create much clearer and more accurate animations, showing entities consistently occupying specific resource slots. This `resource_id` information, along with the event timings and layout coordinates, is crucial for the next stage: preparing the per-frame snapshot data.
+
+Next: [Chapter 5: Snapshot Preparation (`reshape_for_animations` & `generate_animation_df`)](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd)
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

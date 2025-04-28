@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>simpy_resource_enhancement_customresource_store_populate_store_ – Vidigi - Auto Documentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5d2e30ad26079c1dae90a1fd11eba2b9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../autodoc_v3/index.html">Beginner Friendly + 1980s References</a></li><li class="breadcrumb-item"><a href="../autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.html">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Vidigi - Auto Documentation</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Version 1 - Beginner-Friendly</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Animation Facade (<code>animate_activity_log</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Event Log</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Layout Configuration (<code>event_position_df</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 4: Simpy Resource Enhancement (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 5: Snapshot Preparation (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Animation Generation (<code>generate_animation</code>)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Version 2 - Intermediate Programmer</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Animation Facade (<code>animate_activity_log</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Event Log</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Layout Configuration (<code>event_position_df</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 4: Simpy Resource Enhancement (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 5: Snapshot Preparation (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Animation Generation (<code>generate_animation</code>)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Beginner Friendly + 1980s References</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Great Scott! Making Animations Easy with <code>animate_activity_log</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Log Everything! Like K.I.T.T.’s Mission Recorder</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Where Am I? Mapping the Grid with <code>event_position_df</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 5: Prepare for Snapshots, McFly! (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Action! Making the Movie with <code>generate_animation</code></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#chapter-4-more-input-giving-your-resources-an-upgrade-customresource-store-populate_store" id="toc-chapter-4-more-input-giving-your-resources-an-upgrade-customresource-store-populate_store" class="nav-link active" data-scroll-target="#chapter-4-more-input-giving-your-resources-an-upgrade-customresource-store-populate_store">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</a>
+  <ul class="collapse">
+  <li><a href="#the-mission-identifying-individual-resources" id="toc-the-mission-identifying-individual-resources" class="nav-link" data-scroll-target="#the-mission-identifying-individual-resources">The Mission: Identifying Individual Resources</a></li>
+  <li><a href="#need-input-the-customresource" id="toc-need-input-the-customresource" class="nav-link" data-scroll-target="#need-input-the-customresource">Need Input! The <code>CustomResource</code></a></li>
+  <li><a href="#storing-the-goods-simpy.store" id="toc-storing-the-goods-simpy.store" class="nav-link" data-scroll-target="#storing-the-goods-simpy.store">Storing the Goods: <code>simpy.Store</code></a></li>
+  <li><a href="#the-easy-button-populate_store" id="toc-the-easy-button-populate_store" class="nav-link" data-scroll-target="#the-easy-button-populate_store">The Easy Button: <code>populate_store</code></a></li>
+  <li><a href="#putting-it-all-together-modifying-your-simulation" id="toc-putting-it-all-together-modifying-your-simulation" class="nav-link" data-scroll-target="#putting-it-all-together-modifying-your-simulation">Putting It All Together: Modifying Your Simulation</a></li>
+  <li><a href="#under-the-hood-no-need-for-a-flux-capacitor" id="toc-under-the-hood-no-need-for-a-flux-capacitor" class="nav-link" data-scroll-target="#under-the-hood-no-need-for-a-flux-capacitor">Under the Hood: No Need for a Flux Capacitor!</a></li>
+  <li><a href="#conclusion-resources-identified" id="toc-conclusion-resources-identified" class="nav-link" data-scroll-target="#conclusion-resources-identified">Conclusion: Resources Identified!</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../autodoc_v3/index.html">Beginner Friendly + 1980s References</a></li><li class="breadcrumb-item"><a href="../autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.html">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</a></li></ol></nav></header>
+
+
+
+
+<section id="chapter-4-more-input-giving-your-resources-an-upgrade-customresource-store-populate_store" class="level1">
+<h1>Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</h1>
+<p>Great Scott! In <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Chapter 3: Where Am I? Mapping the Grid with <code>event_position_df</code></a>, we learned how to tell <code>vidigi</code> <em>where</em> on the screen to place our entities for different activities, like mapping out the Grid for Tron. We know where the ‘Simulator Bays’ are, but what if we want to see Maverick consistently use <em>Simulator 1</em> while Goose uses <em>Simulator 2</em>?</p>
+<p>Standard Simpy resources (like <code>simpy.Resource</code>) are a bit like the identical worker droids in <em>Silent Running</em> or maybe a whole fleet of K.I.T.T. prototypes before the final Knight Rider – they all look and act the same from the outside. If you have 3 nurses represented by a <code>simpy.Resource(env, capacity=3)</code>, when a patient grabs one, Simpy just knows <em>one</em> of the three is busy. It doesn’t track <em>which specific one</em>.</p>
+<p>This is usually fine for simulation results, but for our animation, it’s like trying to film <em>Top Gun</em> without knowing which specific F-14 Tomcat Maverick is flying in each scene! We want to see consistency. If Maverick starts using Nurse Jackie #1, we want the animation to show him <em>staying</em> with Nurse Jackie #1 until he’s done.</p>
+<p>That’s where <code>vidigi</code>‘s resource enhancement pattern comes in. It’s like giving each resource worker a unique ID badge or maybe painting a different number on each Ghostbusters’ proton pack.</p>
+<section id="the-mission-identifying-individual-resources" class="level2">
+<h2 class="anchored" data-anchor-id="the-mission-identifying-individual-resources">The Mission: Identifying Individual Resources</h2>
+<p>Our mission is to adapt our Simpy simulation model so that <code>vidigi</code> can track the usage of <em>individual</em> resource units. We need a way to: 1. Give each unit of a resource (like each nurse, simulator, or maybe each power loader Ripley might use) a unique ID. 2. Record this unique ID in our <a href="../autodoc_v3/02_event_log_.html">Event Log</a> whenever an entity starts or stops using that specific resource unit.</p>
+<p>This recorded ID (<code>resource_id</code>) is the crucial piece of information <code>vidigi</code> needs to make the animation show consistent resource use.</p>
+</section>
+<section id="need-input-the-customresource" class="level2">
+<h2 class="anchored" data-anchor-id="need-input-the-customresource">Need Input! The <code>CustomResource</code></h2>
+<p>The first piece of our upgrade kit is the <code>CustomResource</code>. It’s a very simple enhancement to the standard <code>simpy.Resource</code>. Think of it as taking a standard Cylon Centurion and welding a unique serial number onto its chassis.</p>
+<p><code>CustomResource</code> is a class provided in <code>vidigi.utils</code> that inherits <em>everything</em> from <code>simpy.Resource</code> but adds one important thing: an <code>id_attribute</code>.</p>
+<p>Here’s a peek under the hood (you don’t usually need to write this yourself, just import it!):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Located in vidigi/utils.py (simplified)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> simpy</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CustomResource(simpy.Resource):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A custom resource with an ID."""</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, env, capacity, id_attribute<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Call the original simpy.Resource setup</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(env, capacity)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add our special ID badge!</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.id_attribute <span class="op">=</span> id_attribute</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Request and release methods are inherited, but could be customized</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (vidigi's default doesn't need to change them)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>See? It’s mostly just a standard <code>simpy.Resource</code>, but it has that extra <code>id_attribute</code> ready to store a unique identifier, like ‘Nurse_1’ or ‘Sim_Bay_Alpha’. Number 5 is alive… and has an ID!</p>
+</section>
+<section id="storing-the-goods-simpy.store" class="level2">
+<h2 class="anchored" data-anchor-id="storing-the-goods-simpy.store">Storing the Goods: <code>simpy.Store</code></h2>
+<p>Okay, we have resources with ID badges (<code>CustomResource</code>), but how do we manage a pool of them? If we have 3 nurses, we need a way to hold all 3 <code>CustomResource</code> instances. We can’t just use <code>simpy.Resource(env, capacity=3)</code> anymore, because that creates <em>one</em> resource object managing 3 anonymous slots.</p>
+<p>Instead, we use <code>simpy.Store</code>. A <code>Store</code> is like a magical container, maybe the Labyrinth’s oubliette, or the Ghostbusters’ Ecto-Containment Unit, or perhaps a vending machine that holds items. You can <code>put</code> items <em>into</em> the store and <code>get</code> items <em>out</em>.</p>
+<p>Crucially for us, we can <code>put</code> our individual <code>CustomResource</code> instances (each with its unique <code>id_attribute</code>) into the <code>Store</code>. When an entity needs a resource, it will <code>yield store.get()</code>, and Simpy will hand it one of the available <code>CustomResource</code> objects from the store.</p>
+</section>
+<section id="the-easy-button-populate_store" class="level2">
+<h2 class="anchored" data-anchor-id="the-easy-button-populate_store">The Easy Button: <code>populate_store</code></h2>
+<p>Manually creating each <code>CustomResource</code> and putting it into the <code>Store</code> can be a bit repetitive, like programming the same patrol route for multiple ED-209s.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- The Manual Way (Don't do this!) ---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> simpy</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vidigi.utils <span class="im">import</span> CustomResource</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>env <span class="op">=</span> simpy.Environment()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>num_nurses <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>nurse_store <span class="op">=</span> simpy.Store(env)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and add Nurse 1</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>nurse_1 <span class="op">=</span> CustomResource(env, capacity<span class="op">=</span><span class="dv">1</span>, id_attribute<span class="op">=</span><span class="st">'Nurse_1'</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>nurse_store.put(nurse_1)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and add Nurse 2</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>nurse_2 <span class="op">=</span> CustomResource(env, capacity<span class="op">=</span><span class="dv">1</span>, id_attribute<span class="op">=</span><span class="st">'Nurse_2'</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>nurse_store.put(nurse_2)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and add Nurse 3</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>nurse_3 <span class="op">=</span> CustomResource(env, capacity<span class="op">=</span><span class="dv">1</span>, id_attribute<span class="op">=</span><span class="st">'Nurse_3'</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>nurse_store.put(nurse_3)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Store now has </span><span class="sc">{</span><span class="bu">len</span>(nurse_store.items)<span class="sc">}</span><span class="ss"> nurses."</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Manual Way ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>That’s a bit much! To make this easier, <code>vidigi</code> provides a helper function: <code>populate_store</code>. It’s like calling Q branch – you tell it how many resources you need (<code>num_resources</code>), which store to put them in (<code>simpy_store</code>), and the simulation environment (<code>sim_env</code>), and it does the work for you!</p>
+<p>Here’s how to use it (this is the recommended way!):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> simpy</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vidigi.utils <span class="im">import</span> populate_store <span class="co"># Import the helper</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>env <span class="op">=</span> simpy.Environment()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>num_nurses <span class="op">=</span> <span class="dv">3</span> <span class="co"># How many nurses we need</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the empty store</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>nurse_store <span class="op">=</span> simpy.Store(env)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the helper to fill the store! Way easier!</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>populate_store(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    num_resources<span class="op">=</span>num_nurses,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    simpy_store<span class="op">=</span>nurse_store,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    sim_env<span class="op">=</span>env</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Store now has </span><span class="sc">{</span><span class="bu">len</span>(nurse_store.items)<span class="sc">}</span><span class="ss"> nurses, created the easy way!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Much cleaner! <code>populate_store</code> automatically creates <code>num_nurses</code> instances of <code>CustomResource</code>, gives each one a unique <code>id_attribute</code> (1, 2, 3,…), and puts them into <code>nurse_store</code>. Ready for action!</p>
+</section>
+<section id="putting-it-all-together-modifying-your-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="putting-it-all-together-modifying-your-simulation">Putting It All Together: Modifying Your Simulation</h2>
+<p>Now, let’s see how to use this pattern in a typical Simpy process function.</p>
+<p><strong>Scenario:</strong> A patient needs to see a nurse.</p>
+<p><strong>1. Old Way (using <code>simpy.Resource</code>)</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Before Vidigi Enhancement ---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> simpy</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume g.n_nurses = 3, env exists</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume nurses = simpy.Resource(env, capacity=g.n_nurses)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume event_log = [] exists</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> patient_process_old(env, patient_id, nurses, event_log):</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> waiting for any nurse."</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Request ANY available nurse slot</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> nurses.request() <span class="im">as</span> req:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> req</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> got a nurse (don't know which!)."</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># --- LOGGING PROBLEM: No specific resource_id ---</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># event_log.append({'patient': patient_id, ..., 'resource_id': ???})</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Simulate treatment time</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> env.timeout(<span class="dv">15</span>) <span class="co"># 15 minutes treatment</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> finished with nurse."</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- LOGGING PROBLEM: No specific resource_id ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In this version, we don’t know <em>which</em> of the 3 nurse slots the patient used, so we can’t log a specific <code>resource_id</code>.</p>
+<p><strong>2. New Way (using <code>Store</code> with <code>CustomResource</code>)</strong></p>
+<p>First, set up the resource store (usually in your model’s <code>__init__</code> or <code>init_resources</code> method):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Setting up the Store (e.g., in Model.__init__) ---</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> simpy</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vidigi.utils <span class="im">import</span> populate_store</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> YourModel:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, env, num_nurses):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.env <span class="op">=</span> env</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.nurse_store <span class="op">=</span> simpy.Store(env)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        populate_store(num_nurses, <span class="va">self</span>.nurse_store, <span class="va">self</span>.env)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ... other setup ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now, modify the process function to use the store and log the ID:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- After Vidigi Enhancement ---</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume model.nurse_store exists and was populated</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume event_log = [] exists</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> patient_process_new(env, patient_id, nurse_store, event_log):</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> waiting for a specific nurse."</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Request a SPECIFIC nurse instance from the store</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    nurse_resource <span class="op">=</span> <span class="cf">yield</span> nurse_store.get() <span class="co"># Like getting a specific item</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># We got one! Access its unique ID badge</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        nurse_id <span class="op">=</span> nurse_resource.id_attribute</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> got nurse </span><span class="sc">{</span>nurse_id<span class="sc">}</span><span class="ss">!"</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># --- LOGGING SUCCESS! ---</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        event_log.append({</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">'patient'</span>: patient_id, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">'event'</span>: <span class="st">'start_nurse_visit'</span>, <span class="st">'time'</span>: env.now,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">'resource_id'</span>: nurse_id <span class="co"># &lt;--- Log the specific ID!</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Simulate treatment time</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> env.timeout(<span class="dv">15</span>) <span class="co"># 15 minutes treatment</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>env<span class="sc">.</span>now<span class="sc">}</span><span class="ss">: Patient </span><span class="sc">{</span>patient_id<span class="sc">}</span><span class="ss"> finished with nurse </span><span class="sc">{</span>nurse_id<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># --- LOGGING SUCCESS! ---</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        event_log.append({</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>            <span class="st">'patient'</span>: patient_id, <span class="st">'event_type'</span>: <span class="st">'resource_use_end'</span>,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">'event'</span>: <span class="st">'end_nurse_visit'</span>, <span class="st">'time'</span>: env.now,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>            <span class="st">'resource_id'</span>: nurse_id <span class="co"># &lt;--- Log the same ID!</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">finally</span>:</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># IMPORTANT: Put the specific nurse back in the store!</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Like returning your proton pack to the rack.</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        nurse_store.put(nurse_resource)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Key changes: * We use <code>yield nurse_store.get()</code> instead of <code>nurses.request()</code>. * We get back a specific <code>nurse_resource</code> object (an instance of <code>CustomResource</code>). * We access its unique ID using <code>nurse_resource.id_attribute</code>. * We <strong>log this ID</strong> in the <code>resource_id</code> column of our <a href="../autodoc_v3/02_event_log_.html">Event Log</a> for both <code>resource_use</code> and <code>resource_use_end</code> events. * Crucially, we use <code>nurse_store.put(nurse_resource)</code> to return the <em>exact same</em> nurse instance back to the pool when we’re done. (Using <code>try...finally</code> ensures it gets put back even if something goes wrong during treatment).</p>
+<p>This pattern ensures our event log contains the specific <code>resource_id</code>, allowing <code>vidigi</code> to render the animation correctly!</p>
+<p>Here’s a visual summary of the interaction:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">sequenceDiagram
+    participant Entity as Patient Process
+    participant Store as simpy.Store (Nurse Store)
+    participant CR as CustomResource (Nurse_1)
+    participant Log as Event Log List
+
+    Entity-&gt;&gt;Store: yield store.get()
+    Store--&gt;&gt;CR: Selects available CustomResource (e.g., Nurse_1)
+    CR--&gt;&gt;Entity: Returns Nurse_1 instance
+    Entity-&gt;&gt;Log: Append 'resource_use' event (resource_id = Nurse_1.id_attribute)
+    Note over Entity: Use the resource (yield timeout)
+    Entity-&gt;&gt;Log: Append 'resource_use_end' event (resource_id = Nurse_1.id_attribute)
+    Entity-&gt;&gt;Store: store.put(Nurse_1)
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="under-the-hood-no-need-for-a-flux-capacitor" class="level2">
+<h2 class="anchored" data-anchor-id="under-the-hood-no-need-for-a-flux-capacitor">Under the Hood: No Need for a Flux Capacitor!</h2>
+<p>How does this magic work? It’s actually quite straightforward, no 1.21 gigawatts required!</p>
+<ol type="1">
+<li><p><strong><code>CustomResource</code> (<code>vidigi/utils.py</code>):</strong> As we saw, it’s just a standard <code>simpy.Resource</code> with an extra <code>id_attribute</code> added during initialization (<code>__init__</code>).</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From vidigi/utils.py</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CustomResource(simpy.Resource):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, env, capacity, id_attribute<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(env, capacity)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.id_attribute <span class="op">=</span> id_attribute <span class="co"># The only addition!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong><code>populate_store</code> (<code>vidigi/utils.py</code>):</strong> This function simply runs a loop. For the number of resources requested, it creates a <code>CustomResource</code> instance (giving it <code>i+1</code> as the <code>id_attribute</code>) and calls the store’s <code>put</code> method.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From vidigi/utils.py (Simplified)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> populate_store(num_resources, simpy_store, sim_env):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_resources):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create a resource with ID i+1 (so IDs start from 1)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        resource_instance <span class="op">=</span> CustomResource(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            sim_env,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            capacity<span class="op">=</span><span class="dv">1</span>, <span class="co"># Usually 1 for items in a store</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            id_attribute <span class="op">=</span> i<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Put it in the store</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        simpy_store.put(resource_instance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Logging:</strong> Your simulation code is responsible for grabbing the <code>.id_attribute</code> from the resource instance obtained via <code>store.get()</code> and putting it into the <code>resource_id</code> column of your event log dictionary/DataFrame.</p></li>
+<li><p><strong>Animation Use:</strong> Later, when <a href="../autodoc_v3/01_animation_facade_animate_activity_log_.html"><code>animate_activity_log</code></a> runs, its helper function <a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html"><code>generate_animation_df</code></a> reads your <a href="../autodoc_v3/02_event_log_.html">Event Log</a>. When it sees a <code>resource_use</code> event, it uses the logged <code>resource_id</code> along with the base position from the <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a> to calculate the <em>exact, consistent</em> screen position for that entity using that specific resource instance (as explained conceptually in Chapter 3).</p></li>
+</ol>
+<p>This simple pattern of adding an ID and using a Store is all it takes to give <code>vidigi</code> the information it needs!</p>
+</section>
+<section id="conclusion-resources-identified" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-resources-identified">Conclusion: Resources Identified!</h2>
+<p>You’ve successfully navigated the resource enhancement quadrant! You now know why standard <code>simpy.Resource</code> isn’t enough for detailed animation tracking and how the <code>CustomResource</code> + <code>simpy.Store</code> + <code>populate_store</code> pattern solves this. It’s like giving every resource worker their own unique callsign – Maverick, Goose, Iceman – instead of just ‘Pilot’.</p>
+<p>By using <code>yield store.get()</code>, logging the <code>.id_attribute</code> as <code>resource_id</code>, and using <code>store.put()</code>, you provide the crucial link <code>vidigi</code> needs to show entities consistently interacting with the <em>same</em> resource icon throughout the animation.</p>
+<p>With our event logs (<a href="../autodoc_v3/02_event_log_.html">Chapter 2: Event Log</a>) correctly recording events and specific resource IDs, and our layout (<a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Chapter 3: Layout Configuration (<code>event_position_df</code>)</a>) defined, we’re almost ready to make the animation movie. But first, <code>vidigi</code> needs to process that raw event log into a format suitable for animation frames – like taking snapshots of the action.</p>
+<p>Let’s jump in the DeLorean and head to the next chapter: <a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html">Chapter 5: Snapshot Preparation (<code>reshape_for_animations</code> &amp; <code>generate_animation_df</code>)</a>. Get ready to reshape time… I mean, data!</p>
+<hr>
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,201 @@
+# Chapter 3: Where Am I? Mapping the Grid with `event_position_df`
+
+Greetings, Program! In [Chapter 2: Log Everything! Like K.I.T.T.'s Mission Recorder](02_event_log_.qmd), we learned how to create the crucial `event_log`, the detailed script telling us *what* happened and *when* in our system (like Maverick's flight training log). But just knowing *when* Maverick started waiting for the simulator isn't enough to make our animation. We need to know *where* on the screen the "Waiting Area" or the "Simulator Bay" should actually *be*.
+
+Imagine trying to film *Back to the Future* without knowing where to put the Clock Tower or the Twin Pines Mall. Chaos! Or trying to navigate the Tron grid without coordinates. Double chaos! We need a map, a blueprint, a layout guide.
+
+That's exactly what the **Layout Configuration (`event_position_df`)** provides. It's the stage map for your `vidigi` animation movie set.
+
+## The Mission: Setting the Stage
+
+Our mission, should we choose to accept it (and not self-destruct this message), is to define the visual layout for our Top Gun training animation. We need to tell `vidigi` where the 'Arrival Zone', the 'Waiting Area', and the 'Simulator Bays' should appear on the screen. This allows `vidigi` to place the icons representing Maverick and Goose correctly as they move through their training steps.
+
+## The Blueprint: Anatomy of the `event_position_df`
+
+The `event_position_df` is, like the `event_log`, a pandas DataFrame. It acts as a lookup table, connecting the `event` names from your log to specific locations and other visual properties on the animation canvas. Think of it as the director's annotated script, marking where each scene takes place.
+
+Here are the key columns you'll typically use:
+
+1.  **`event`:** This column contains the specific event names you used in your [Event Log](02_event_log_.qmd) (e.g., 'arrival', 'wait\_for\_simulator', 'start\_simulator', 'depart'). This is the key `vidigi` uses to find the right location.
+2.  **`x`:** The horizontal coordinate (like on an arcade screen) for this event's *base* position. Lower numbers are typically further left.
+3.  **`y`:** The vertical coordinate for this event's *base* position. Lower numbers are typically *higher* up on the screen (like typical computer graphics coordinates, not graph paper!).
+4.  **`label`:** A human-readable name for this stage or activity (e.g., "Arrival Zone", "Wait for Simulator", "Simulator Bay"). This is helpful for understanding the layout and can optionally be displayed directly on the animation (using the `display_stage_labels=True` option in [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd)). Think of it as the sign outside the location, like "Lou's Cafe" or "Stark Industries".
+5.  **`resource` (Optional):** This column is used for `resource_use` events (like 'start\_simulator'). It contains the *name* of the attribute in your `scenario` object (we'll discuss scenarios later, think of it as the inventory list from Weyland-Yutani) that holds the *total number* of available resources for this step (e.g., the name of the variable storing the number of flight simulators). This allows `vidigi` to draw placeholders for all available resource slots, even if they aren't currently in use.
+
+**Important Note:** You only need to define positions for events where entities *stop* or *start* something visually significant:
+*   `arrival` and `depart` (mandatory, unless you filter them out later).
+*   `queue` events (e.g., 'wait\_for\_simulator').
+*   `resource_use` start events (e.g., 'start\_simulator').
+You *don't* typically need entries for `resource_use_end` events (like 'end\_simulator'), as the entity is usually already at the resource location.
+
+## Creating Your Layout: Engage!
+
+Let's build the `event_position_df` for our Top Gun example. We'll use pandas again.
+
+```python
+import pandas as pd
+
+# Define the layout data as a list of dictionaries
+position_data = [
+    # Where pilots first appear
+    {'event': 'arrival', 'x': 50, 'y': 200, 'label': 'Hangar Deck (Arrival)'},
+
+    # Where pilots wait if simulators are busy
+    {'event': 'wait_for_simulator', 'x': 200, 'y': 200, 'label': 'Ready Room (Queue)'},
+
+    # The *base* position for the simulator resource area
+    {'event': 'start_simulator', 'x': 350, 'y': 200, 'label': 'Simulator Bays', 'resource': 'n_simulators'},
+    # ^ We added 'resource' here! Let's assume our scenario object (g) will have g.n_simulators
+
+    # Where pilots go after finishing
+    {'event': 'depart', 'x': 500, 'y': 200, 'label': 'Debriefing (Departure)'},
+
+    # We also need an 'exit' position for vidigi's internal logic
+    {'event': 'exit', 'x': 550, 'y': 200, 'label': 'Off Duty'}
+]
+
+# Convert the list into a pandas DataFrame
+event_pos_df = pd.DataFrame(position_data)
+
+# Let's beam it up and see what it looks like!
+print("Our Stage Layout Blueprint:")
+print(event_pos_df)
+```
+
+This code creates our layout definition.
+*   We list each key `event` name from our [Event Log](02_event_log_.qmd).
+*   We assign `x` and `y` coordinates. Think of the screen as a grid; (0, 0) is usually the top-left. Higher `x` moves right, higher `y` moves *down*.
+*   We give each a readable `label`.
+*   For 'start\_simulator', we add the `resource` column, linking it to a hypothetical `n_simulators` variable in our setup (we'll see this more in [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd)).
+*   We include an 'exit' event, which is used internally by `vidigi` to make entities disappear cleanly.
+
+This `event_pos_df` DataFrame is the second crucial input (after the `event_log_df`) that you pass to the main [`animate_activity_log`](01_animation_facade_animate_activity_log_.qmd) function.
+
+```python
+# --- Hypothetical call to the main function ---
+# (Assuming event_log_df from Chapter 2 and event_pos_df from above exist)
+# (Also assuming a 'scenario' object 'g' exists with g.n_simulators = 2)
+
+# from vidigi.animation import animate_activity_log # If not already imported
+
+# g = YourScenarioClass() # Define g with g.n_simulators = 2
+# g.n_simulators = 2 # Need to define this for the 'resource' column link
+
+# my_animation = animate_activity_log(
+#     event_log=event_log_df,          # The script (What/When)
+#     event_position_df=event_pos_df,  # The stage map (Where)
+#     scenario=g                       # Info about resource counts
+# )
+
+# my_animation.show() # Engage! Show the animation!
+# --- End Hypothetical Call ---
+print("Imagine the animation running with this layout!")
+```
+
+If you ran this (with the actual data and scenario setup), `vidigi` would use `event_pos_df` to place the icons for Maverick and Goose at the 'Hangar Deck' (50, 200), then move them to the 'Ready Room' (base X=200, Y=200) if they queue, or to one of the 'Simulator Bays' (base X=350, Y=200) when they start training, and finally to 'Debriefing' (500, 200).
+
+## Under the Hood: How `vidigi` Uses the Layout
+
+So, how does `vidigi` use this blueprint? It doesn't build the set itself, but it tells the actors (our patient/pilot icons) where to stand based on the script (`event_log`) and the map (`event_position_df`).
+
+The key function that uses the `event_position_df` is [`generate_animation_df`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd). Remember from [Chapter 1](01_animation_facade_animate_activity_log_.qmd) that the `event_log` gets processed into "snapshots" – a table showing which `event` each `patient` is currently experiencing at each moment in time.
+
+[`generate_animation_df`](05_snapshot_preparation_reshape_for_animations_generate_animation_df_.qmd) takes these snapshots and the `event_position_df` and does the following:
+
+1.  **Lookup:** For each patient in each time snapshot, it looks at their current `event`.
+2.  **Merge:** It finds the matching `event` row in the `event_position_df`.
+3.  **Get Base Position:** It retrieves the base `x` and `y` coordinates from that row.
+4.  **Calculate Final Position:** This is where it gets clever, like Johnny 5 calculating trajectories:
+    *   If the `event_type` is `arrival_departure` or `resource_use_end` (or anything *not* queue/resource use), the final position is usually just the base (x, y).
+    *   If the `event_type` is `queue`, it calculates an offset. Patients in a queue typically line up *to the left* of the base `x` coordinate. The first patient might be at `x - gap`, the second at `x - 2*gap`, and so on. If the queue gets too long (`wrap_queues_at`), it starts a new row below.
+    *   If the `event_type` is `resource_use`, it uses the `resource_id` (from the event log, e.g., 'Sim\_1', 'Sim\_2') to calculate an offset from the base `x`. Resource 1 might be at `x - gap`, Resource 2 at `x - 2*gap`, etc., again wrapping if needed (`wrap_resources_at`). This ensures Maverick always appears at the *same* simulator bay ('Sim\_1') while using it.
+
+Here's a simplified sequence diagram:
+
+```{mermaid}
+sequenceDiagram
+    participant Snapshots as Snapshot Data (Patient, Event, Time, Type, ResourceID?)
+    participant GADF as generate_animation_df
+    participant Layout as event_position_df
+    participant Output as Data with Positions (X, Y added)
+
+    GADF->>Snapshots: Receive snapshot data for a time point
+    loop For each patient in snapshot
+        GADF->>Layout: Find row where Layout.event == Snapshot.event
+        Layout-->>GADF: Return matching row (with base X, Y, Type)
+        alt event_type is 'queue'
+            GADF->>GADF: Calculate queue position (e.g., base_x - rank * gap)
+        else event_type is 'resource_use'
+            GADF->>GADF: Calculate resource position (e.g., base_x - resource_id * gap)
+        else Other types
+            GADF->>GADF: Use base position (x, y)
+        end
+        GADF->>Output: Store patient, time, calculated X, Y, etc.
+    end
+    Output-->>GADF: Complete data with positions for this time point
+```
+
+The [`generate_animation`](06_animation_generation_generate_animation_.qmd) function also uses `event_position_df`, primarily to:
+*   Draw the optional stage labels (`display_stage_labels=True`).
+*   Draw the placeholder icons for *all* available resources (using the `resource` column and the linked `scenario` object) so you can see empty slots.
+
+Internally, the code within `vidigi/prep.py` (specifically `generate_animation_df`) might look conceptually like this:
+
+```python
+# --- Inside generate_animation_df (Simplified Concept) ---
+# (Input: full_patient_df = snapshots, event_position_df = layout)
+import pandas as pd
+import numpy as np # For calculations
+
+def calculate_positions(full_patient_df, event_position_df, gap_between_entities, wrap_queues_at, gap_between_rows):
+
+    # Merge snapshots with layout info based on the 'event' name
+    df_with_base_pos = pd.merge(full_patient_df, event_position_df, on='event', how='left')
+
+    # --- Calculate Queue Positions ---
+    queues = df_with_base_pos[df_with_base_pos['event_type'] == 'queue'].copy()
+    if not queues.empty:
+        # 'rank' tells us position in queue (1st, 2nd, etc.) - calculated earlier
+        queues['row'] = np.floor((queues['rank'] - 1) / wrap_queues_at)
+        # Base X minus offset for position in line, adjusted for wrapping
+        queues['x_final'] = queues['x'] - (queues['rank'] % wrap_queues_at) * gap_between_entities # Simplified!
+        # Base Y plus offset for row wrapping
+        queues['y_final'] = queues['y'] + queues['row'] * gap_between_rows
+
+    # --- Calculate Resource Positions (Similar logic using resource_id) ---
+    resources = df_with_base_pos[df_with_base_pos['event_type'] == 'resource_use'].copy()
+    # ... similar calculations for resources['x_final'], resources['y_final'] using resource_id ...
+    # Simplified: Assume resources just use base position for this example
+    if not resources.empty:
+        resources['x_final'] = resources['x']
+        resources['y_final'] = resources['y']
+
+
+    # --- Handle other event types (e.g., arrival, depart) ---
+    others = df_with_base_pos[~df_with_base_pos['event_type'].isin(['queue', 'resource_use'])].copy()
+    if not others.empty:
+        others['x_final'] = others['x'] # Just use the base position
+        others['y_final'] = others['y']
+
+    # Combine back into one DataFrame
+    final_df = pd.concat([queues, resources, others], ignore_index=True)
+    return final_df
+
+# (Output: final_df contains the original snapshot data plus 'x_final' and 'y_final' columns)
+```
+
+This simplified snippet shows the core idea: merge the layout's base coordinates, then adjust them based on the event type and ranking/resource ID to get the final plotting position.
+
+## Conclusion: You Have the Touch! You Have the Power!
+
+Yeah! You've now grasped the `event_position_df`, the essential blueprint that tells `vidigi` *where* to place everything in your animation. It maps your logical event names (like 'wait\_for\_simulator') to physical screen coordinates (X, Y), provides labels, and even helps visualize resource capacity.
+
+Combined with the [Event Log](02_event_log_.qmd) (the "What" and "When"), the `event_position_df` (the "Where") gives `vidigi` almost everything it needs to create your visual masterpiece via the [Animation Facade (`animate_activity_log`)](01_animation_facade_animate_activity_log_.qmd).
+
+But what about those resources? How do we properly represent things like nurses, simulators, or maybe even proton packs that entities need to use? And how does that `resource_id` in the event log get generated? We need to enhance our simulation model slightly.
+
+Don't have a cow, man! Let's find out in the next chapter: [Chapter 4: Simpy Resource Enhancement (`CustomResource`, `Store`, `populate_store`)](04_simpy_resource_enhancement_customresource_store_populate_store_.qmd).
+
+---
+
+Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge)

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>snapshot_preparation_reshape_for_animations_generate_animation_df_ – Vidigi - Auto Documentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5d2e30ad26079c1dae90a1fd11eba2b9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../autodoc_v3/index.html">Beginner Friendly + 1980s References</a></li><li class="breadcrumb-item"><a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html">Chapter 5: Prepare for Snapshots, McFly! (`reshape_for_animations` &amp; `generate_animation_df`)</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Vidigi - Auto Documentation</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Version 1 - Beginner-Friendly</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Animation Facade (<code>animate_activity_log</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Event Log</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Layout Configuration (<code>event_position_df</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 4: Simpy Resource Enhancement (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 5: Snapshot Preparation (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Animation Generation (<code>generate_animation</code>)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Version 2 - Intermediate Programmer</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Animation Facade (<code>animate_activity_log</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Event Log</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Layout Configuration (<code>event_position_df</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 4: Simpy Resource Enhancement (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 5: Snapshot Preparation (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v2/06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Animation Generation (<code>generate_animation</code>)</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Beginner Friendly + 1980s References</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tutorial: vidigi</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/01_animation_facade_animate_activity_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 1: Great Scott! Making Animations Easy with <code>animate_activity_log</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/02_event_log_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 2: Log Everything! Like K.I.T.T.’s Mission Recorder</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 3: Where Am I? Mapping the Grid with <code>event_position_df</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Chapter 5: Prepare for Snapshots, McFly! (`reshape_for_animations` &amp; `generate_animation_df`)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../autodoc_v3/06_animation_generation_generate_animation_.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Chapter 6: Action! Making the Movie with <code>generate_animation</code></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#chapter-5-prepare-for-snapshots-mcfly-reshape_for_animations-generate_animation_df" id="toc-chapter-5-prepare-for-snapshots-mcfly-reshape_for_animations-generate_animation_df" class="nav-link active" data-scroll-target="#chapter-5-prepare-for-snapshots-mcfly-reshape_for_animations-generate_animation_df">Chapter 5: Prepare for Snapshots, McFly! (<code>reshape_for_animations</code> &amp; <code>generate_animation_df</code>)</a>
+  <ul class="collapse">
+  <li><a href="#the-mission-from-diary-to-movie-frames" id="toc-the-mission-from-diary-to-movie-frames" class="nav-link" data-scroll-target="#the-mission-from-diary-to-movie-frames">The Mission: From Diary to Movie Frames</a></li>
+  <li><a href="#step-1-taking-the-photos---reshape_for_animations" id="toc-step-1-taking-the-photos---reshape_for_animations" class="nav-link" data-scroll-target="#step-1-taking-the-photos---reshape_for_animations">Step 1: Taking the Photos - <code>reshape_for_animations</code></a></li>
+  <li><a href="#step-2-setting-the-scene---generate_animation_df" id="toc-step-2-setting-the-scene---generate_animation_df" class="nav-link" data-scroll-target="#step-2-setting-the-scene---generate_animation_df">Step 2: Setting the Scene - <code>generate_animation_df</code></a></li>
+  <li><a href="#how-it-fits-together-the-assembly-line" id="toc-how-it-fits-together-the-assembly-line" class="nav-link" data-scroll-target="#how-it-fits-together-the-assembly-line">How It Fits Together: The Assembly Line</a></li>
+  <li><a href="#under-the-hood-like-looking-inside-johnny-5" id="toc-under-the-hood-like-looking-inside-johnny-5" class="nav-link" data-scroll-target="#under-the-hood-like-looking-inside-johnny-5">Under the Hood: Like Looking Inside Johnny 5</a>
+  <ul class="collapse">
+  <li><a href="#reshape_for_animations-internals" id="toc-reshape_for_animations-internals" class="nav-link" data-scroll-target="#reshape_for_animations-internals"><code>reshape_for_animations</code> Internals</a></li>
+  <li><a href="#generate_animation_df-internals" id="toc-generate_animation_df-internals" class="nav-link" data-scroll-target="#generate_animation_df-internals"><code>generate_animation_df</code> Internals</a></li>
+  </ul></li>
+  <li><a href="#conclusion-data-reshaped-positions-calculated" id="toc-conclusion-data-reshaped-positions-calculated" class="nav-link" data-scroll-target="#conclusion-data-reshaped-positions-calculated">Conclusion: Data Reshaped, Positions Calculated!</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../autodoc_v3/index.html">Beginner Friendly + 1980s References</a></li><li class="breadcrumb-item"><a href="../autodoc_v3/05_snapshot_preparation_reshape_for_animations_generate_animation_df_.html">Chapter 5: Prepare for Snapshots, McFly! (`reshape_for_animations` &amp; `generate_animation_df`)</a></li></ol></nav></header>
+
+
+
+
+<section id="chapter-5-prepare-for-snapshots-mcfly-reshape_for_animations-generate_animation_df" class="level1">
+<h1>Chapter 5: Prepare for Snapshots, McFly! (<code>reshape_for_animations</code> &amp; <code>generate_animation_df</code>)</h1>
+<p>Greetings, Programs! In <a href="../autodoc_v3/04_simpy_resource_enhancement_customresource_store_populate_store_.html">Chapter 4: More Input! Giving Your Resources an Upgrade (<code>CustomResource</code>, <code>Store</code>, <code>populate_store</code>)</a>, we learned how to give our resources unique IDs, like giving each Cylon a distinct serial number, so we can track exactly <em>which</em> resource (like ‘Nurse_1’ or ‘Sim_2’) is being used. We ensured our <a href="../autodoc_v3/02_event_log_.html">Event Log</a> now captures this crucial <code>resource_id</code>.</p>
+<p>But our <code>event_log</code> is still just a chronological list of things that happened – like a mission diary dictated into K.I.T.T.’s recorder. It tells us <em>when</em> Maverick started waiting, <em>when</em> he got ‘Sim_1’, <em>when</em> he finished. To make an animation, we need something more structured. We need to know <em>exactly who</em> is <em>exactly where</em> at <em>specific moments in time</em>, like freezing frames in a movie. We need to turn that diary into a series of snapshots, ready for the big screen!</p>
+<p>This is where the dynamic duo of data transformation comes in: <code>reshape_for_animations</code> and <code>generate_animation_df</code>. Think of them as the unsung heroes working behind the scenes, like the techs prepping the DeLorean or the crew setting up the shots for <em>Top Gun</em>.</p>
+<section id="the-mission-from-diary-to-movie-frames" class="level2">
+<h2 class="anchored" data-anchor-id="the-mission-from-diary-to-movie-frames">The Mission: From Diary to Movie Frames</h2>
+<p>Imagine you have K.I.T.T.’s complete sensor logs for a day. It’s just a long list: “10:01: Scanned sector Alpha”, “10:03: Detected suspicious activity”, “10:05: Engaged Turbo Boost”. To make a visual replay, you don’t just want the list; you want to see K.I.T.T.’s <em>position</em> and <em>status</em> on a map every, say, 10 seconds.</p>
+<p>That’s our goal here. We take the raw <a href="../autodoc_v3/02_event_log_.html">Event Log</a> (the diary) and transform it into a frame-by-frame description of the system state (the movie reel).</p>
+<ol type="1">
+<li><strong><code>reshape_for_animations</code></strong>: Figures out <em>who</em> is doing <em>what</em> event at regular time intervals (our snapshots).</li>
+<li><strong><code>generate_animation_df</code></strong>: Calculates the precise <em>X, Y coordinates</em> for each entity in each snapshot, based on their event, status (queuing/using resource), and the <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a>.</li>
+</ol>
+<p>These functions are usually called automatically by the main <a href="../autodoc_v3/01_animation_facade_animate_activity_log_.html"><code>animate_activity_log</code></a> function, but understanding them helps you see how the magic happens!</p>
+</section>
+<section id="step-1-taking-the-photos---reshape_for_animations" class="level2">
+<h2 class="anchored" data-anchor-id="step-1-taking-the-photos---reshape_for_animations">Step 1: Taking the Photos - <code>reshape_for_animations</code></h2>
+<p>This function is like hitting pause on your VCR at regular intervals during <em>Back to the Future</em> to see where Marty, Doc, and the Libyans are at that exact moment.</p>
+<p><strong>Purpose:</strong> To convert the continuous stream of events into discrete snapshots in time.</p>
+<p><strong>Input:</strong> The <a href="../autodoc_v3/02_event_log_.html">Event Log</a> DataFrame.</p>
+<p><strong>Output:</strong> A new DataFrame. Each row represents a specific <code>patient</code> at a specific <code>minute</code> (or whatever <code>every_x_time_units</code> you choose). It tells you the <code>event</code> they were last recorded doing <em>before</em> or <em>at</em> that <code>minute</code>. It also calculates their <code>rank</code> if multiple patients are doing the same event (e.g., who is 1st, 2nd, 3rd in the ‘wait_for_simulator’ queue at that minute).</p>
+<p>Let’s imagine a tiny piece of our Top Gun <a href="../autodoc_v3/02_event_log_.html">Event Log</a>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Input Event Log (Simplified) ---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>event_data <span class="op">=</span> [</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'arrival'</span>, <span class="st">'time'</span>: <span class="dv">0</span>, <span class="st">'event_type'</span>: <span class="st">'arrival_departure'</span>},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'arrival'</span>, <span class="st">'time'</span>: <span class="dv">5</span>, <span class="st">'event_type'</span>: <span class="st">'arrival_departure'</span>},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'wait_for_simulator'</span>, <span class="st">'time'</span>: <span class="dv">1</span>, <span class="st">'event_type'</span>: <span class="st">'queue'</span>},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'wait_for_simulator'</span>, <span class="st">'time'</span>: <span class="dv">6</span>, <span class="st">'event_type'</span>: <span class="st">'queue'</span>},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'time'</span>: <span class="dv">10</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_1'</span>},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'time'</span>: <span class="dv">15</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_2'</span>}</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>event_log_df <span class="op">=</span> pd.DataFrame(event_data)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Input ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If we call <code>reshape_for_animations</code> (conceptually, with <code>every_x_time_units=5</code>), it might produce snapshots like this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Output Snapshots (Conceptual from reshape_for_animations) ---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>snapshot_data <span class="op">=</span> [</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Minute 0: Only Maverick arrived</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">0</span>, <span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'arrival'</span>, <span class="st">'event_type'</span>: <span class="st">'arrival_departure'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Minute 5: Maverick is waiting, Goose just arrived</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">5</span>, <span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'wait_for_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'queue'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">5</span>, <span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'arrival'</span>, <span class="st">'event_type'</span>: <span class="st">'arrival_departure'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Minute 10: Maverick started Sim 1, Goose is now waiting (rank 1 in queue)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">10</span>, <span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_1'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">10</span>, <span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'wait_for_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'queue'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Minute 15: Maverick still in Sim 1, Goose started Sim 2</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">15</span>, <span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_1'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>},</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    {<span class="st">'minute'</span>: <span class="dv">15</span>, <span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_2'</span>, <span class="st">'rank'</span>: <span class="fl">2.0</span>} <span class="co"># Note: Rank might be based on resource_id here</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>reshaped_df <span class="op">=</span> pd.DataFrame(snapshot_data)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(reshaped_df)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Output ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This <code>reshaped_df</code> tells us exactly who was doing what at each 5-minute interval. It’s the foundation for our animation frames!</p>
+</section>
+<section id="step-2-setting-the-scene---generate_animation_df" class="level2">
+<h2 class="anchored" data-anchor-id="step-2-setting-the-scene---generate_animation_df">Step 2: Setting the Scene - <code>generate_animation_df</code></h2>
+<p>Okay, we have our snapshots telling us <em>who</em> is doing <em>what</em> and <em>when</em>. Now we need to figure out <em>where</em> they should be on the screen. This function is like the director telling the actors their exact marks on the stage floor, using the script (snapshots) and the set design (<a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a>).</p>
+<p><strong>Purpose:</strong> To calculate the final X and Y screen coordinates for each entity in each snapshot.</p>
+<p><strong>Input:</strong> 1. The snapshot DataFrame produced by <code>reshape_for_animations</code>. 2. The <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a> DataFrame.</p>
+<p><strong>Output:</strong> A DataFrame almost identical to the input snapshot DataFrame, but with crucial new columns: * <code>x_final</code>: The calculated horizontal position. * <code>y_final</code>: The calculated vertical position. * <code>icon</code>: An assigned emoji icon for the entity (like giving each Smurf a unique hat… wait, wrong reference… like giving each Autobot a unique symbol!).</p>
+<p>It uses the <code>event</code>, <code>event_type</code>, <code>rank</code>, and <code>resource_id</code> from the snapshot, along with the base <code>x</code> and <code>y</code> from the layout, to determine the final position.</p>
+<ul>
+<li><strong>Simple Events:</strong> (like ‘arrival’, ‘depart’) often just use the base X, Y from the layout.</li>
+<li><strong>Queues:</strong> Patients line up. The <code>rank</code> determines their position in the line (e.g., rank 1 is at <code>base_x - gap</code>, rank 2 at <code>base_x - 2*gap</code>). It can even wrap the queue into multiple rows like the aliens in <em>Space Invaders</em> if it gets too long!</li>
+<li><strong>Resource Use:</strong> The position is calculated based on the <em>specific</em> <code>resource_id</code> (e.g., ‘Sim_1’ might be at <code>base_x - gap</code>, ‘Sim_2’ at <code>base_x - 2*gap</code>). This ensures Maverick always appears at the <em>same</em> simulator spot when using ‘Sim_1’.</li>
+</ul>
+<p>Let’s take one snapshot from our previous example (Minute 10) and imagine our layout:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Input Snapshot Row (Minute 10) ---</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>snapshot_row_mav <span class="op">=</span> {<span class="st">'minute'</span>: <span class="dv">10</span>, <span class="st">'patient'</span>: <span class="st">'Maverick'</span>, <span class="st">'event'</span>: <span class="st">'start_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'resource_use'</span>, <span class="st">'resource_id'</span>: <span class="st">'Sim_1'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>}</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>snapshot_row_goose <span class="op">=</span> {<span class="st">'minute'</span>: <span class="dv">10</span>, <span class="st">'patient'</span>: <span class="st">'Goose'</span>, <span class="st">'event'</span>: <span class="st">'wait_for_simulator'</span>, <span class="st">'event_type'</span>: <span class="st">'queue'</span>, <span class="st">'rank'</span>: <span class="fl">1.0</span>}</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Input Layout Info (Simplified) ---</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>layout_info <span class="op">=</span> {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'start_simulator'</span>: {<span class="st">'x'</span>: <span class="dv">350</span>, <span class="st">'y'</span>: <span class="dv">200</span>},</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'wait_for_simulator'</span>: {<span class="st">'x'</span>: <span class="dv">200</span>, <span class="st">'y'</span>: <span class="dv">200</span>}</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Assume gap_between_entities = 10, gap_between_resources = 20 ---</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>gap_entities <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>gap_resources <span class="op">=</span> <span class="dv">20</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>generate_animation_df</code> would process these rows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Output with Positions (Conceptual from generate_animation_df) ---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Maverick (Resource Use): Position depends on resource_id (Sim_1 is ID 1)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>mav_x_final <span class="op">=</span> layout_info[<span class="st">'start_simulator'</span>][<span class="st">'x'</span>] <span class="op">-</span> (<span class="dv">1</span> <span class="op">*</span> gap_resources) <span class="co"># 350 - 20 = 330</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>mav_y_final <span class="op">=</span> layout_info[<span class="st">'start_simulator'</span>][<span class="st">'y'</span>] <span class="co"># 200</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>output_row_mav <span class="op">=</span> {<span class="op">**</span>snapshot_row_mav, <span class="st">'x_final'</span>: mav_x_final, <span class="st">'y_final'</span>: mav_y_final, <span class="st">'icon'</span>: <span class="st">'🧔🏼'</span>}</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Goose (Queue): Position depends on rank (Rank 1)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>goose_x_final <span class="op">=</span> layout_info[<span class="st">'wait_for_simulator'</span>][<span class="st">'x'</span>] <span class="op">-</span> (<span class="dv">1</span> <span class="op">*</span> gap_entities) <span class="co"># 200 - 10 = 190</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>goose_y_final <span class="op">=</span> layout_info[<span class="st">'wait_for_simulator'</span>][<span class="st">'y'</span>] <span class="co"># 200</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>output_row_goose <span class="op">=</span> {<span class="op">**</span>snapshot_row_goose, <span class="st">'x_final'</span>: goose_x_final, <span class="st">'y_final'</span>: goose_y_final, <span class="st">'icon'</span>: <span class="st">'👨🏻‍🦰'</span>}</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output_row_mav)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(output_row_goose)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Output ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now, each entity in each snapshot has precise coordinates and an icon. This is the data that directly feeds the animation engine! It’s like having the final shooting script with exact camera angles and actor positions marked.</p>
+</section>
+<section id="how-it-fits-together-the-assembly-line" class="level2">
+<h2 class="anchored" data-anchor-id="how-it-fits-together-the-assembly-line">How It Fits Together: The Assembly Line</h2>
+<p>Remember the flow from <a href="../autodoc_v3/01_animation_facade_animate_activity_log_.html">Chapter 1: Great Scott! Making Animations Easy with <code>animate_activity_log</code></a>? <code>reshape_for_animations</code> and <code>generate_animation_df</code> are the crucial middle steps orchestrated by the main function:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">sequenceDiagram
+    participant AAL as animate_activity_log
+    participant RFA as reshape_for_animations
+    participant GADF as generate_animation_df
+    participant GA as generate_animation
+
+    AAL-&gt;&gt;RFA: Call with event_log
+    Note over RFA: Process log into time snapshots (who/what/when)
+    RFA--&gt;&gt;AAL: Return reshaped_df (Snapshots)
+    AAL-&gt;&gt;GADF: Call with reshaped_df &amp; event_position_df
+    Note over GADF: Calculate final X,Y positions based on event, rank, resource_id &amp; layout. Assign icons.
+    GADF--&gt;&gt;AAL: Return data_with_positions (Animation-ready data)
+    AAL-&gt;&gt;GA: Call with data_with_positions
+    GA--&gt;&gt;AAL: Return Plotly Figure
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>These two functions handle all the complex data wrangling, turning your raw simulation output into perfectly formatted input for the final animation step.</p>
+</section>
+<section id="under-the-hood-like-looking-inside-johnny-5" class="level2">
+<h2 class="anchored" data-anchor-id="under-the-hood-like-looking-inside-johnny-5">Under the Hood: Like Looking Inside Johnny 5</h2>
+<p>Let’s peek briefly at the circuits inside <code>vidigi/prep.py</code> where these functions live. No need to grab your screwdriver like Stephanie trying to fix Number 5!</p>
+<section id="reshape_for_animations-internals" class="level3">
+<h3 class="anchored" data-anchor-id="reshape_for_animations-internals"><code>reshape_for_animations</code> Internals</h3>
+<p>Conceptually, this function works like this:</p>
+<ol type="1">
+<li><strong>Pivot Log:</strong> It first reshapes the event log slightly to easily find the ‘arrival’ and ‘depart’ times for each patient.</li>
+<li><strong>Iterate Through Time:</strong> It loops through time, usually in steps defined by <code>every_x_time_units</code> (e.g., 0, 10, 20…).</li>
+<li><strong>Find Active Patients:</strong> At each <code>minute</code>, it identifies patients who have arrived <em>before</em> or <em>at</em> this minute and have departed <em>after</em> this minute (or haven’t departed yet). These are the patients “on screen” at this time.</li>
+<li><strong>Get Latest Event:</strong> For each active patient, it looks back through their event history <em>up to this minute</em> and finds their single most recent event. This defines their current state (e.g., ‘wait_for_simulator’ or ‘start_simulator’).</li>
+<li><strong>Rank Patients:</strong> If multiple patients are in the same state (e.g., multiple people in the ‘wait_for_simulator’ queue), it ranks them based on when they entered that state (using the original event log index as a tie-breaker).</li>
+<li><strong>Limit Snapshot Size:</strong> It might cap the number of patients shown per event per snapshot (<code>step_snapshot_max</code>) to keep things tidy.</li>
+<li><strong>Store Snapshot:</strong> It stores the state (event, type, rank, etc.) for all active patients at this <code>minute</code>.</li>
+<li><strong>Add Exit Step:</strong> After processing all minutes, it adds a final ‘exit’ event for each patient slightly after their last recorded event, ensuring they visually leave the screen.</li>
+<li><strong>Combine &amp; Return:</strong> It combines all the snapshots into one big DataFrame.</li>
+</ol>
+<p>Here’s a simplified conceptual code snippet:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Inside reshape_for_animations (Conceptual - vidigi/prep.py) ---</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reshape_for_animations_simplified(event_log, every_x_time_units):</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    all_snapshots <span class="op">=</span> []</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get arrival/departure times easily (details omitted)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    pivoted_log <span class="op">=</span> event_log.pivot_table(...)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    max_time <span class="op">=</span> event_log[<span class="st">'time'</span>].<span class="bu">max</span>() <span class="co"># Find simulation end time</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Loop through time in steps</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> minute <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, max_time <span class="op">+</span> every_x_time_units, every_x_time_units):</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Find patients active at this 'minute' (details omitted)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        active_patients <span class="op">=</span> find_active_patients(pivoted_log, minute)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> active_patients:</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Get all events for active patients up to 'minute'</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            relevant_events <span class="op">=</span> event_log[</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                (event_log[<span class="st">'patient'</span>].isin(active_patients)) <span class="op">&amp;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                (event_log[<span class="st">'time'</span>] <span class="op">&lt;=</span> minute)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Find the single latest event for each patient</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            latest_states <span class="op">=</span> relevant_events.sort_values(<span class="st">'time'</span>).groupby(<span class="st">'patient'</span>).tail(<span class="dv">1</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Rank patients within the same event (e.g., queue order)</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>            latest_states[<span class="st">'rank'</span>] <span class="op">=</span> latest_states.groupby(<span class="st">'event'</span>)[<span class="st">'time'</span>].rank(method<span class="op">=</span><span class="st">'first'</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Add the current minute to the snapshot data</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>            latest_states[<span class="st">'minute'</span>] <span class="op">=</span> minute</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            all_snapshots.append(latest_states)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Combine all snapshots into one DataFrame</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    full_patient_df <span class="op">=</span> pd.concat(all_snapshots, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add a final 'exit' step for cleanup (details omitted)</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    full_patient_df <span class="op">=</span> add_final_exit_step(full_patient_df, every_x_time_units)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> full_patient_df.sort_values([<span class="st">"minute"</span>, <span class="st">"event"</span>])</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Conceptual Code ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="generate_animation_df-internals" class="level3">
+<h3 class="anchored" data-anchor-id="generate_animation_df-internals"><code>generate_animation_df</code> Internals</h3>
+<p>This function takes the snapshots and layout and calculates positions:</p>
+<ol type="1">
+<li><strong>Merge Layout:</strong> It merges the snapshot DataFrame with the <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a> based on the <code>event</code> name. Now each snapshot row knows the <em>base</em> X and Y for its event.</li>
+<li><strong>Separate by Type:</strong> It often handles different <code>event_type</code> groups separately (queues, resource use, others).</li>
+<li><strong>Calculate Queue Positions:</strong>
+<ul>
+<li>For <code>queue</code> events, it calculates the row and column within the queue based on the <code>rank</code> and the <code>wrap_queues_at</code> parameter.</li>
+<li>It computes <code>x_final</code> by subtracting an offset (based on column and <code>gap_between_entities</code>) from the base <code>x</code>.</li>
+<li>It computes <code>y_final</code> by adding an offset (based on row and <code>gap_between_rows</code>) to the base <code>y</code>.</li>
+</ul></li>
+<li><strong>Calculate Resource Positions:</strong>
+<ul>
+<li>For <code>resource_use</code> events, it uses the <code>resource_id</code> (which is usually numeric after <code>populate_store</code>) and <code>wrap_resources_at</code> similarly to calculate row and column.</li>
+<li>It computes <code>x_final</code> and <code>y_final</code> using offsets based on the resource’s column/row and <code>gap_between_resources</code>/<code>gap_between_rows</code>.</li>
+</ul></li>
+<li><strong>Handle Other Events:</strong> For arrivals, departures, etc., <code>x_final</code> and <code>y_final</code> are usually just set to the base <code>x</code> and <code>y</code>.</li>
+<li><strong>Assign Icons:</strong> It assigns a unique icon from a list (you can provide a <code>custom_entity_icon_list</code>) to each unique <code>patient</code> ID. Think of it like the machine in <em>Short Circuit</em> assigning laser targets – but with emojis!</li>
+<li><strong>Combine &amp; Return:</strong> It concatenates the processed groups back into a single DataFrame with <code>x_final</code>, <code>y_final</code>, and <code>icon</code> columns added.</li>
+</ol>
+<p>Simplified conceptual code:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Inside generate_animation_df (Conceptual - vidigi/prep.py) ---</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_animation_df_simplified(snapshots_df, layout_df, wrap_queues_at, gap_entities, gap_rows):</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Merge snapshots with layout base positions</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    df_with_base_pos <span class="op">=</span> pd.merge(snapshots_df, layout_df, on<span class="op">=</span><span class="st">'event'</span>, how<span class="op">=</span><span class="st">'left'</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Process Queues ---</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    queues <span class="op">=</span> df_with_base_pos[df_with_base_pos[<span class="st">'event_type'</span>] <span class="op">==</span> <span class="st">'queue'</span>].copy()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> queues.empty:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate row number (0-based)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        queues[<span class="st">'row'</span>] <span class="op">=</span> np.floor((queues[<span class="st">'rank'</span>] <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> wrap_queues_at)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate position within the row (0-based, adjusted for rank starting at 1)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        queues[<span class="st">'col_in_row'</span>] <span class="op">=</span> (queues[<span class="st">'rank'</span>] <span class="op">-</span> <span class="dv">1</span>) <span class="op">%</span> wrap_queues_at</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate final positions</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        queues[<span class="st">'x_final'</span>] <span class="op">=</span> queues[<span class="st">'x'</span>] <span class="op">-</span> queues[<span class="st">'col_in_row'</span>] <span class="op">*</span> gap_entities</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        queues[<span class="st">'y_final'</span>] <span class="op">=</span> queues[<span class="st">'y'</span>] <span class="op">+</span> queues[<span class="st">'row'</span>] <span class="op">*</span> gap_rows</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Process Resources (Similar logic using resource_id) ---</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    resources <span class="op">=</span> df_with_base_pos[df_with_base_pos[<span class="st">'event_type'</span>] <span class="op">==</span> <span class="st">'resource_use'</span>].copy()</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... similar x_final, y_final calculation using resource_id ...</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> resources.empty:</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Simplified: Assume base position for this example</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        resources[<span class="st">'x_final'</span>] <span class="op">=</span> resources[<span class="st">'x'</span>]</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        resources[<span class="st">'y_final'</span>] <span class="op">=</span> resources[<span class="st">'y'</span>]</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Process Others ---</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    others <span class="op">=</span> df_with_base_pos[<span class="op">~</span>df_with_base_pos[<span class="st">'event_type'</span>].isin([<span class="st">'queue'</span>, <span class="st">'resource_use'</span>])].copy()</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> others.empty:</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        others[<span class="st">'x_final'</span>] <span class="op">=</span> others[<span class="st">'x'</span>]</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        others[<span class="st">'y_final'</span>] <span class="op">=</span> others[<span class="st">'y'</span>]</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Combine results</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    final_df <span class="op">=</span> pd.concat([queues, resources, others], ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Assign icons to patients (details omitted)</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    final_df <span class="op">=</span> assign_icons(final_df)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> final_df</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End Conceptual Code ---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>These functions do the heavy lifting of data preparation so the final animation step can be smooth as hover-converting a DeLorean.</p>
+</section>
+</section>
+<section id="conclusion-data-reshaped-positions-calculated" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-data-reshaped-positions-calculated">Conclusion: Data Reshaped, Positions Calculated!</h2>
+<p>Whoa, heavy! We’ve seen how <code>vidigi</code> takes the raw <a href="../autodoc_v3/02_event_log_.html">Event Log</a> – our simulation’s diary – and uses the tag team of <code>reshape_for_animations</code> and <code>generate_animation_df</code> to turn it into perfectly structured, animation-ready data.</p>
+<ul>
+<li><code>reshape_for_animations</code> acts like a time machine, taking snapshots to tell us <em>who</em> is doing <em>what</em> at regular intervals.</li>
+<li><code>generate_animation_df</code> acts like a choreographer, using those snapshots and the <a href="../autodoc_v3/03_layout_configuration_event_position_df_.html">Layout Configuration (<code>event_position_df</code>)</a> to determine the <em>exact screen coordinates</em> for every entity, handling queues and resource assignments like a boss.</li>
+</ul>
+<p>Now we have a DataFrame where every row represents an entity at a specific time <em>and</em> a specific location on screen, complete with an icon. It’s like the final, detailed storyboard for our movie. All that’s left is to actually film it!</p>
+<p>Get ready to yell “Action!” as we move to the final step: <a href="../autodoc_v3/06_animation_generation_generate_animation_.html">Chapter 6: Animation Generation (<code>generate_animation</code>)</a>.</p>
+<hr>
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
